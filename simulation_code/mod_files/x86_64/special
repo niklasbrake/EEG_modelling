@@ -1,0 +1,17 @@
+#!/bin/sh
+if test "x${NRNHOME}" = "x" ; then
+    NRNHOME="/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx512/MPI/intel2020/openmpi4/neuron/8.0.0"
+fi
+if test "${NEURONHOME}" = "" ; then
+    NEURONHOME=${NRNHOME}/share/nrn
+    export NEURONHOME
+fi
+if test "x${NRNBIN}" = "x" ; then
+    NRNBIN="/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx512/MPI/intel2020/openmpi4/neuron/8.0.0/bin"
+fi
+if test "" = "yes" ; then
+    NRNIV="${NRNBIN}/nrniv.app/Contents/MacOS/nrniv"
+else
+    NRNIV="${NRNBIN}/nrniv"
+fi
+"${NRNIV}" -dll "/home/nbrake/aperiodic_EEG_modelling/simulations/functions/mod_files/x86_64/.libs/libnrnmech.so" "$@"

@@ -1,0 +1,33 @@
+
+./IKd_traub.c: ../IKd_traub.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd ".."; MODLUNIT=$(NRNUNITS) $(NOCMODL) IKd_traub.mod -o "/home/nbrake/aperiodic_EEG_modelling/simulations/functions/mod_files/x86_64")
+
+./IKd_traub.o: ./IKd_traub.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./IM_zach.c: ../IM_zach.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd ".."; MODLUNIT=$(NRNUNITS) $(NOCMODL) IM_zach.mod -o "/home/nbrake/aperiodic_EEG_modelling/simulations/functions/mod_files/x86_64")
+
+./IM_zach.o: ./IM_zach.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./INa_traub_shifted.c: ../INa_traub_shifted.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd ".."; MODLUNIT=$(NRNUNITS) $(NOCMODL) INa_traub_shifted.mod -o "/home/nbrake/aperiodic_EEG_modelling/simulations/functions/mod_files/x86_64")
+
+./INa_traub_shifted.o: ./INa_traub_shifted.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
+./Leak.c: ../Leak.mod
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd ".."; MODLUNIT=$(NRNUNITS) $(NOCMODL) Leak.mod -o "/home/nbrake/aperiodic_EEG_modelling/simulations/functions/mod_files/x86_64")
+
+./Leak.o: ./Leak.c
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
+	$(COMPILE) -I".." $(INCLUDES) -fPIC -c $< -o $@
+
