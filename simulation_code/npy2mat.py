@@ -3,9 +3,7 @@ import numpy as np
 import glob
 import sys
 
-if __name__ == "__main__":
-    pars = sys.argv
-    path = pars[1]
+def main(path):
     npzFiles = glob.glob(path + "/*.npy")
     for i,f in enumerate(npzFiles):
         d = np.load(f)
@@ -29,4 +27,9 @@ if __name__ == "__main__":
     fm = path+'/simulation_data.mat'
     savemat(fm, {'dipoles':dipoles,'time':t.T,'V':Vm.T})
     print('Done (',path, ')')
+
+if __name__ == "__main__":
+    pars = sys.argv
+    path = pars[1]
+    main(path)
 
