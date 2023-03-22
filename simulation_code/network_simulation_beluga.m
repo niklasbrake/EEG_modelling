@@ -12,7 +12,7 @@ classdef network_simulation_beluga
     end
 
     properties (Constant)
-        resourceFolder = '';
+        resourceFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
         functionFolder = fileparts(mfilename('fullpath'));
         eiFraction = 0.85;
         eFiringRate = 0.5; % Hz
@@ -748,14 +748,13 @@ classdef network_simulation_beluga
             q = gpuArray(dp);
 
             for j = 1:length(idcs)
-                eeg = network_simulation_beluga.getEEG(q,sa,idcs(j));
+                eeg = detrend(network_simulation_beluga.getEEG(q,sa,idcs(j)),'constant');
                 temp = mypmtm(eeg,2e3,2);
                if(j==1)
                     P = zeros(size(temp));
                 end
                 P = P+temp;
             end
-            close(h);
             P = P/length(idcs)*pi/2;
             f = 0.5:0.5:1e3;
         end
