@@ -12,7 +12,7 @@ classdef network_simulation_beluga
     end
 
     properties (Constant)
-        resourceFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
+        resourceFolder = '/lustre04/scratch/nbrake/resource_folder';
         functionFolder = fileparts(mfilename('fullpath'));
         eiFraction = 0.85;
         eFiringRate = 0.5; % Hz
@@ -350,6 +350,10 @@ classdef network_simulation_beluga
                 savePath = strrep(obj.savePath,'\','/');
                 functionFolder = strrep(obj.functionFolder,'\','/');
                 postNetwork = strrep(obj.postNetwork,'\','/');
+            else
+                savePath = obj.savePath;
+                functionFolder = obj.functionFolder;
+                postNetwork = obj.postNetwork;
             end
 
             if(~exist(fullfile(obj.morphologyPath,[obj.neuronTypes{1} '.swc'])))
