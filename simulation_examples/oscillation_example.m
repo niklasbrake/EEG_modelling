@@ -1,5 +1,6 @@
+folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw';
 % Initialize network
-network = network_simulation_beluga(fullfile(pwd,'oscillation_example'));
+network = network_simulation_beluga(fullfile(folder,'EI_oscillations','WT'));
 
 % Initialize post network
 nPostNeurons = 1;
@@ -17,15 +18,17 @@ copyfile(fullfile(network.preNetwork,'spikeTimes.csv'),fullfile(network.preNetwo
 x = csvread(fullfile(network.preNetwork,'locations.csv'));
 x1 = 2*pi*x(:,1);
 y1 = asin(2*x(:,2)-1);
-data = [(1:nPreNeurons)',x1(:),y1(:)];
+data = [(1:nPreNeurons)'-1,x1(:),y1(:)];
 dlmwrite(fullfile(network.preNetwork,'UMAP_embedding.csv'),data,'precision','%.4f');
+
+% Place syanpse optimally (input between 0 and 1, with 1 optimal and 0 random)
 network.form_connections(1);
 
 % Simulate dipoles
 network = network.simulate();
-[time,V,dipoles] = network.importSimulationResults;
+% [time,V,dipoles] = network.importSimulationResults;
 
 % Compute EEG signal
-[sa,X] = network_simulation_beluga.getHeadModel;
-location = randi(size(sa.cortex75K.vc,1)); % Random location
-eeg = network_simulation_beluga.getEEG(dipoles,sa,location);
+% [sa,X] = network_simulation_beluga.getHeadModel;
+% location = randi(size(sa.cortex75K.vc,1)); % Random location
+% eeg = network_simulation_beluga.getEEG(dipoles,sa,location);

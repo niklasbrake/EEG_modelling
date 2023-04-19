@@ -141,7 +141,7 @@ function [ids,ts,ei,elevation,azimuth,parents] = simulatespikes(N,tmax,offset,br
 
             % Make some spikes random depending on branchNo
             idcs2 = rand(nTrans,1)<branchNo;
-            t0 = tsE(idcs).*idcs2+interp1(oscDist,t,rand(nTrans,1)).*(1-idcs2);
+            t0 = tsE(idcs).*idcs2+interp1(oscDist,t,rand(nTrans,1),'next','extrap').*(1-idcs2);
 
             % Add spikes to inhibitory neuron
             tsI(count+1:count+nTrans) = t0+dt*rand(nTrans,1);
