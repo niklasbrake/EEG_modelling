@@ -49,7 +49,7 @@ def sphere_embed(d):
     x = np.arctan2(x, y)
     y = -np.arccos(z)
     theta = np.reshape(x,[-1,1])
-    phi = np.reshape(y,[-1,1])+np.pi/2
+    phi = np.reshape(y,[-1,1])
     return theta, phi
 
 if __name__ == "__main__":

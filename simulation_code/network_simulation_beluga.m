@@ -9,14 +9,15 @@ classdef network_simulation_beluga
         preNetwork
         spikingFile
         savePath
+        eFiringRate = 0.5; % Hz
+        iFiringRate = 2.5; % Hz
     end
 
     properties (Constant)
-        resourceFolder = '/lustre04/scratch/nbrake/resource_folder';
+        % resourceFolder = '/lustre04/scratch/nbrake/resource_folder';
+        resourceFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
         functionFolder = fileparts(mfilename('fullpath'));
         eiFraction = 0.85;
-        eFiringRate = 0.5; % Hz
-        iFiringRate = 2.5; % Hz
         eMulti = 1;
         iMulti = 1;
         % eMulti = 3.6; % Syanpses/connections Markram et al.
@@ -489,7 +490,7 @@ classdef network_simulation_beluga
                 neuronIDs(j+1:j+nEx) = randperm(ME,nEx);
                 j = j+nEx;
 
-                nIn = poissrnd(B(i)/eiRatio);
+                nIn = poissrnd(B(i)*eiRatio*(1-obj.eiFraction));
                 spikeTime(j+1:j+nIn) = t(i) + rand(1,nIn)*dt - dt/2;
                 neuronIDs(j+1:j+nIn) = ME+randperm(MI,nIn);
                 j = j+nIn;
@@ -693,7 +694,7 @@ classdef network_simulation_beluga
         function [embedding,idPreSyn] = loadSynapseLocations(umapFile,N)
 
             data = csvread(umapFile);
-            [x,y,z] = sph2cart(data(:,2),data(:,3),data(:,3)*0+1);
+            [x,y,z] = sph2cart(data(:,2),data(:,3)+pi/2,data(:,3)*0+1);
             idPreSyn = data(:,1)+1;
             embedding = [x(:),y(:),z(:)];
             M = size(embedding,1);
