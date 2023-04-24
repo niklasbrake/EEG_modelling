@@ -4,8 +4,12 @@ function [ids,ts,ei] = simulatespikes_osc(N,tmax,network,oscillation_freq)
     end
     M1 = floor(N/2);
     M2 = N-M1;
-    [ids1,ts1,ei1,elevation1,azimuth1,parents1] = simulatespikes(M1,tmax,0,network.branchNo,oscillation_freq);
-    [ids2,ts2,ei2,elevation2,azimuth2,parents2] = simulatespikes(M2,tmax,1,network.branchNo,oscillation_freq);
+
+    eFiringRate = network.eFiringRate;
+    iFiringRate = network.iFiringRate;
+
+    [ids1,ts1,ei1,elevation1,azimuth1,parents1] = simulatespikes(M1,tmax,0,network.branchNo,oscillation_freq,eFiringRate,iFiringRate);
+    [ids2,ts2,ei2,elevation2,azimuth2,parents2] = simulatespikes(M2,tmax,1,network.branchNo,oscillation_freq,eFiringRate,iFiringRate);
     ids = [ids1;ids2+M1];
     ts = [ts1;ts2];
     ei = [ei1(:);ei2(:)];
@@ -17,11 +21,9 @@ function [ids,ts,ei] = simulatespikes_osc(N,tmax,network,oscillation_freq)
     csvwrite(fullfile(network.preNetwork,'multisynapse_IDs.csv'),parents(:));
     network_simulation_beluga.save_presynaptic_network(ids,ts,ei,N,network.spikingFile)
 end
-function [ids,ts,ei,elevation,azimuth,parents] = simulatespikes(N,tmax,offset,branchNo,f0)
+function [ids,ts,ei,elevation,azimuth,parents] = simulatespikes(N,tmax,offset,branchNo,f0,eFiringRate,iFiringRate)
 
     tmax = tmax*1e-3;
-    eFiringRate = 0.5;
-    iFiringRate = 2.5;
 
     % Number of E and I synapses
     N_ex_syn = floor(0.8*N);
