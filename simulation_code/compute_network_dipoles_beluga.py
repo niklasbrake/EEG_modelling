@@ -74,8 +74,9 @@ def addsyns(nrnID,meta_data,preEI,preSpikes,propofol):
         else:
             params = EX_PARAMS.copy()
         params['idx'] = synSeg[i]
-        synParams.append(params)
-        synTimes.append(ts)
+        if(len(ts)>0):
+            synParams.append(params)
+            synTimes.append(ts)
 
     return synParams,synTimes
 
