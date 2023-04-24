@@ -1,10 +1,11 @@
-function [ids,ts,ei,x] = simulatespikes_avaETosc(network,beta,N)
+function [ids,ts,ei,x,X1] = simulatespikes_avaETosc(network,beta,c,N)
 
-functionFolder = 'C:\Users\brake\Documents\GitHub\EEG_modelling\simulation_code';
+functionFolder = fileparts(mfilename('fullpath'));
 fun = fullfile(functionFolder,'ising.exe');
 
 % Run ising model twice
-system([fun ' ' num2str(beta) ' > ' fullfile(network.preNetwork,'spikes1.txt')]);
+arg = [fun ' ' num2str(beta) ' ' num2str(c) ' > ' fullfile(network.preNetwork,'spikes1.txt')];
+system(arg);
 % system([fun ' ' num2str(beta) ' > ' fullfile(network.preNetwork,'spikes2.txt')]);
 
 ei = [];
@@ -36,7 +37,7 @@ ei = [];
     % X2 = dlmread(fullfile(network.preNetwork,'spikes2.txt'));
     X2 = X2(:,1); X2 = X2(1:network.tmax+1);
     X2 = X2./abs(min(X2))+1+1e-6;
-% Randomly draw spike times from this firing rate    
+% Randomly draw spike times from this firing rate
     mE = network.eiFraction*(N-M);
     lamE = poissrnd(network.eFiringRate*network.tmax*1e-3*mE);
     mI = N-M-mE;

@@ -71,6 +71,7 @@ void update(){
 
 int main (int argc, char **argv){
     beta = atof(argv[1]);
+    c = atof(argv[2]);
     srand(time(0));              // seed for the random number generator
     int t=0;                     // time 1=sweep over N spins
     int wait =100;               // waiting time before printing/measuring
