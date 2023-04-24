@@ -32,36 +32,12 @@ def load_spike_times(spikingFile):
                     preSpikes.append([float(x) for x in temp[1:]])
     return preEI,preSpikes
 
-def addsyns(nrnID,meta_data,preEI,preSpikes,propofol):
+def addsyns(nrnID,connection_data,preEI,preSpikes,parameters):
     # SYANPSE_FAILURE_RATE = 0.7
     SYANPSE_FAILURE_RATE = 0
-    if(propofol>100):
-        tau = int(propofol/100)
-        remainder = propofol-tau*100
-        tau_change = int(remainder/10)
-        weight_change = remainder-tau_change*10
-    else:
-        tau = 10
-        tau_change = 1
-        weight_change = 1
 
-    EX_PARAMS = {'idx': 0,
-                    'e': 0,
-                    'syntype': 'Exp2Syn',
-                    'tau1': 0.3,
-                    'tau2': 1.8,
-                    'weight': 0.0007, # uS
-                    'record_current': False}
-    IN_PARAMS = {'idx': 0,
-                    'e':-80,
-                    'syntype': 'Exp2Syn',
-                    'tau1': 1,
-                    'tau2': tau*tau_change,
-                    'weight': 0.0007*weight_change, # uS
-                    'record_current': False}
-
-    synSeg = meta_data['synSeg'][nrnID]
-    synPre = meta_data['synPre'][nrnID]
+    synSeg = connection_data['synSeg'][nrnID]
+    synPre = connection_data['synPre'][nrnID]
     synTimes = list()
     synParams = list()
     # Get excitatory syanpse locations
@@ -70,9 +46,9 @@ def addsyns(nrnID,meta_data,preEI,preSpikes,propofol):
         spikeSelection = np.random.binomial(len(ts),1-SYANPSE_FAILURE_RATE)
         ts = np.random.choice(ts,spikeSelection,replace=False).tolist()
         if(preEI[synPre[i]]):
-            params = IN_PARAMS.copy()
+            params = parameters["iSynParams"].copy()
         else:
-            params = EX_PARAMS.copy()
+            params = parameters["eSynParams"].copy()
         params['idx'] = synSeg[i]
         if(len(ts)>0):
             synParams.append(params)
@@ -80,21 +56,21 @@ def addsyns(nrnID,meta_data,preEI,preSpikes,propofol):
 
     return synParams,synTimes
 
-def main(meta_data,preEI,preSpikes,savePath,T_MAX=100,activeSoma=False,propofol=0):
+def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX=100):
 
     # Initialize neuron morphology
-    nrnM = init_neuron(meta_data['mFile'],activeSoma)
+    nrnM = init_neuron(connection_data['mFile'],parameters)
 
     N = T_MAX*16+1
-    M = len(meta_data['cellIDs'])
+    M = len(connection_data['cellIDs'])
     data = np.zeros([M*5,N])
     # Simulate neurons with given morphology
-    for k,nrnID in enumerate(meta_data['cellIDs']):
-        cell = LFPy.Cell(nrnM.sectionList,v_init=-65,celsius=37)
+    for k,nrnID in enumerate(connection_data['cellIDs']):
+        cell = LFPy.Cell(nrnM.sectionList,v_init=parameters['pas_mem_pars']['erev_leak'],celsius=37)
         cell.tstop = T_MAX
 
         # Add synapses to neuron model
-        synParams,synTimes = addsyns(nrnID,meta_data,preEI,preSpikes,propofol)
+        synParams,synTimes = addsyns(nrnID,connection_data,preEI,preSpikes,parameters)
         syn = list()
         for i in range(len(synParams)):
             syn.append(LFPy.Synapse(cell, **synParams[i]))
@@ -109,7 +85,7 @@ def main(meta_data,preEI,preSpikes,savePath,T_MAX=100,activeSoma=False,propofol=
         data[5*k:5*(k+1),:] = np.concatenate((t,cdm.data.T,v),axis=1).T
         cell.strip_hoc_objects()
 
-    mType = str.split(meta_data['mFile'],'/')[-1][:-4]
+    mType = str.split(connection_data['mFile'],'/')[-1][:-4]
     saveFile = savePath+'/'+ mType
     np.save(saveFile, data)
 
@@ -121,15 +97,16 @@ if __name__ == "__main__":
     spikingFile = pars[2]
     savePath = pars[3]
     T_MAX = int(pars[4])
-    activeSoma = (pars[5]=="true")
-    propofol = float(pars[6])
+
+    with open(os.path.join(savePath,'_parameters.json'), 'r') as f:
+        parameters = json.load(f)
 
     preEI,preSpikes = load_spike_times(spikingFile)
 
     conDir = os.path.join(postnetwork,'json')
     conFiles = os.listdir(conDir)
 
-    for meta_data_file in conFiles:
-        with open(os.path.join(conDir,meta_data_file), 'r') as f:
-            meta_data = json.load(f)
-        main(meta_data,preEI,preSpikes,savePath,T_MAX,activeSoma,propofol)
+    for connection_data_file in conFiles:
+        with open(os.path.join(conDir,connection_data_file), 'r') as f:
+            connection_data = json.load(f)
+        main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX)

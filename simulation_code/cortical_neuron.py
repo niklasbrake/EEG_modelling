@@ -12,10 +12,12 @@ import json
 
 class cortical_neuron():
     mechanismFolder = os.path.join(os.path.dirname(__file__),'mod_files')
-    def __init__(self,mFile,activeSoma=False):
-        AXIAL_RESISTANCE        = 100
-        EREV_LEAK               = -58.5
-        G_LEAK                  = 0.0011
+    def __init__(self,mFile,parameters):
+        pars = parameters['biophys_pars']
+
+        AXIAL_RESISTANCE        = pars['pas_mem_pars']['Ra']
+        EREV_LEAK               = pars['pas_mem_pars']['erev_leak']
+        G_LEAK                  = pars['pas_mem_pars']['g_leak']
 
         pts3d,connections,segs,morphData = getMorphoSegments.morph2Segs(mFile)
         load_mechanisms(cortical_neuron.mechanismFolder)
@@ -32,16 +34,14 @@ class cortical_neuron():
         self.soma.insert('Leak')
         self.soma.e_Leak = EREV_LEAK
         self.soma.gmax_Leak = G_LEAK
-        if activeSoma:
-            with open(os.path.join(cortical_neuron.mechanismFolder,'conductances.json'),'r') as f:
-                active_conductance_params = json.load(f)
+        if pars['activeSoma']:
             self.soma.insert('inaT')
-            self.soma.shift_inaT = active_conductance_params[mType]['shift']
+            self.soma.shift_inaT = pars['shift'][mType]
             self.soma.vtraub_inaT = -68
-            self.soma.gnabar_inaT = active_conductance_params[mType]['gnabar']
+            self.soma.gnabar_inaT = pars['gnabar'][mType]
             self.soma.ena = 60
             self.soma.insert('ikdT')
-            self.soma.gkbar_ikdT = active_conductance_params[mType]['gkbar']
+            self.soma.gkbar_ikdT = pars['gkbar'][mType]
             self.soma.ek = -80
             # self.soma.insert('imZ')
             # self.soma.gkbar_imZ = 5*1e-5

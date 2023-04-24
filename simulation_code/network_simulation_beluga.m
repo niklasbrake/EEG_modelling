@@ -9,19 +9,13 @@ classdef network_simulation_beluga
         preNetwork
         spikingFile
         savePath
-        eFiringRate = 0.5; % Hz
-        iFiringRate = 2.5; % Hz
+        parameters
     end
 
     properties (Constant)
         % resourceFolder = '/lustre04/scratch/nbrake/resource_folder';
         resourceFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
         functionFolder = fileparts(mfilename('fullpath'));
-        eiFraction = 0.85;
-        eMulti = 1;
-        iMulti = 1;
-        % eMulti = 3.6; % Syanpses/connections Markram et al.
-        % iMulti = 13.9; % Syanpses/connections Markram et al.
     end
 
     properties (Access = private)
@@ -45,12 +39,20 @@ classdef network_simulation_beluga
 
         function obj = network_simulation_beluga(outputPath)
             warning('off','MATLAB:MKDIR:DirectoryExists')
+
+            % Import all network parameters from JSON file
+            fid = fopen(fullfile(network_simulation_beluga.functionFolder,'mod_files','default_parameters.json'));
+            str = char(fread(fid,inf)');
+            fclose(fid);
+            obj.parameters = jsondecode(str);
+
+            % Create file strcture for model outputs.
             if(nargin>0)
                 obj.outputPath = outputPath;
                 obj.postNetwork = fullfile(outputPath,'postsynaptic_network');
                 obj.preNetwork = fullfile(outputPath,'presynaptic_network');
                 obj.correlationFile = fullfile(obj.preNetwork,'correlations.csv');
-                obj.savePath = fullfile(obj.outputPath,'LFPy');
+                obj.savePath = fullfile(obj.outputPath,'simulation');
                 obj.spikingFile = fullfile(outputPath,'presynaptic_network','spikeTimes.csv');
                 mkdir(obj.outputPath);
                 mkdir(obj.postNetwork);
@@ -63,17 +65,16 @@ classdef network_simulation_beluga
             obj.synapseCount = N;
         end
 
+        function N = getsynapsecount(obj)
+            N = obj.synapseCount;
+        end
+
         function obj = setSpikingFile(obj,filename)
             obj.spikingFile = filename;
         end
 
         function obj = setSavePath(obj,pathName)
             obj.savePath = pathName;
-        end
-
-        function obj = setFiringRate(obj,lambdaE,lambdaI)
-            obj.eFiringRate = lambdaE;
-            obj.iFiringRate = lambdaI;
         end
 
         function network = setCorrelationFile(network,file)
@@ -84,28 +85,8 @@ classdef network_simulation_beluga
             obj.postNetwork = pathName;
         end
 
-        function obj = addActiveChannels(obj,toAdd)
-            if(nargin<2)
-                obj.activeConductances = true;
-            else
-                obj.activeConductances = toAdd;
-            end
-        end
-
-        function obj = changeInhibitorySynapseParams(obj,x)
-            % Changes physiology of GABA receptors based on
-            % input vector x. x must be of the form
-            %    x = [tau_decay,tau_scale_factor,amplitude_scale_factor]
-            % (Scaling factors must be less than 10).
-            obj.inSynParamChanges = x(:)'*[100;10;1];
-        end
-
         function file = getCorrelationFile(network)
             file = network.correlationFile;
-        end
-
-        function N = getsynapsecount(obj)
-            N = obj.synapseCount;
         end
 
         function [time,V,dipoles] = importSimulationResults(network)
@@ -210,7 +191,7 @@ classdef network_simulation_beluga
             else
                 multID = -ones(obj.synapseCount,1);
             end
-            mutliK = obj.eiFraction*obj.eMulti+(1-obj.eiFraction)*obj.iMulti;
+            mutliK = obj.parameters.eiFraction*obj.parameters.eCellParams.multiSynapseCount+(1-obj.parameters.eiFraction)*obj.parameters.iCellParams.multiSynapseCount;
             multiN = ceil(min(sum(multID==-1),obj.synapseCount)/mutliK);
             parentSynapses = find(multID==-1);
 
@@ -362,7 +343,12 @@ classdef network_simulation_beluga
                 error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
             end
 
-            params = strjoin({postNetwork,obj.spikingFile,savePath,int2str(obj.tmax+100),char(string(obj.activeConductances)),num2str(obj.inSynParamChanges)});
+            params = strjoin({postNetwork,obj.spikingFile,savePath,int2str(obj.tmax)});
+
+            str = jsonencode(obj.parameters);
+            fid = fopen(fullfile(obj.savePath,'_parameters.json'),'w');
+            fprintf(fid,str);
+            fclose(fid);
 
             % Convert connections to JSON files
             pySimulate(postNetwork,fullfile(functionFolder,'prep_simulations.py'));
@@ -401,7 +387,7 @@ classdef network_simulation_beluga
 
         function save(obj,filename)
             if(nargin<2)
-                filename = 'data.mat';
+                filename = 'model.mat';
             end
             network = obj;
             save(fullfile(obj.outputPath,filename),'network');
@@ -459,11 +445,11 @@ classdef network_simulation_beluga
             t = 0:dt:tmax;
             N = length(t);
 
-            ME = floor(obj.eiFraction*M);
+            ME = floor(obj.parameters.eiFraction*M);
             MI = M-ME;
 
             k = 4;
-            h = obj.eFiringRate*dt*ME*(1-m);
+            h = obj.parameters.eCellParams.firingRate*dt*ME*(1-m);
 
             % Generate mean firing rate using critical branching process
             B = zeros(N,1);
@@ -482,7 +468,7 @@ classdef network_simulation_beluga
             numspikes = sum(B);
             spikeTime = zeros(5*numspikes,1);
             neuronIDs = zeros(5*numspikes,1);
-            eiRatio = obj.iFiringRate/obj.eFiringRate;
+            eiRatio = obj.parameters.iCellParams.firingRate/obj.parameters.eCellParams.firingRate;
             j = 0;
             for i = 1:length(t)
                 nEx = poissrnd(B(i));
@@ -490,7 +476,7 @@ classdef network_simulation_beluga
                 neuronIDs(j+1:j+nEx) = randperm(ME,nEx);
                 j = j+nEx;
 
-                nIn = poissrnd(B(i)*eiRatio*(1-obj.eiFraction));
+                nIn = poissrnd(B(i)*eiRatio*(1-obj.parameters.eiFraction));
                 spikeTime(j+1:j+nIn) = t(i) + rand(1,nIn)*dt - dt/2;
                 neuronIDs(j+1:j+nIn) = ME+randperm(MI,nIn);
                 j = j+nIn;
@@ -507,12 +493,12 @@ classdef network_simulation_beluga
             tmax = tmax*1e-3;
 
             % Number of E and I synapses
-            N_ex_syn = floor(obj.eiFraction*N);
+            N_ex_syn = floor(obj.parameters.eiFraction*N);
             N_in_syn = N-N_ex_syn;
 
             % Multisynapse count (predicted by Markram et al., Cell 2015)
-            N_ex_pre = ceil(N_ex_syn/obj.eMulti);
-            N_in_pre = ceil(N_in_syn/obj.iMulti);
+            N_ex_pre = ceil(N_ex_syn/obj.parameters.eCellParams.multiSynapseCount);
+            N_in_pre = ceil(N_in_syn/obj.parameters.iCellParams.multiSynapseCount);
 
             % Initialize
             ei = [zeros(1,N_ex_syn),ones(1,N_in_syn)];
@@ -552,14 +538,14 @@ classdef network_simulation_beluga
             tN = length(t);
 
             % Random external input
-            nTrans = poissrnd(obj.eFiringRate*dt*N_ex_pre);
+            nTrans = poissrnd(obj.parameters.eCellParams.firingRate*dt*N_ex_pre);
             idsE(1:nTrans) = randperm(N_ex_pre,nTrans);
             post = idsE(1:nTrans);
             k = nTrans;
             tsE(1:nTrans) = t(1)*ones(nTrans,1);
             count = nTrans;
 
-            exN = poissrnd(obj.eFiringRate*dt*N_ex_pre*(1-obj.branchNo),tN,1);
+            exN = poissrnd(obj.parameters.eCellParams.firingRate*dt*N_ex_pre*(1-obj.branchNo),tN,1);
 
             for i = 2:tN-1
                 % Get spiking cells at previous time point
@@ -604,7 +590,7 @@ classdef network_simulation_beluga
             for i = 1:N_in_pre
                 D0 = dist_metric([elevation_I(i),azimuth_I(i)],[elevation_E,azimuth_E]);
                 [~,I] = sort(D0,'ascend');
-                k = poissrnd(obj.iFiringRate/obj.eFiringRate);
+                k = poissrnd(obj.parameters.iCellParams.firingRate/obj.parameters.eCellParams.firingRate);
                 D1 = exprnd(0.02,k,1);
                 D0(1) = Inf;
                 idcs0 = 1:length(D0);

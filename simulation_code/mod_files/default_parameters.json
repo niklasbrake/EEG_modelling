@@ -1,0 +1,84 @@
+
+{
+    "_comments": {
+        "synapse_parameters": "Synaptic weight parameter is the maximal conductance of the synapse and has units of mS. Time scales have units of ms. e is the reversal potential of the synapse and has units of mV. Idx is a parameter that will be replaed by the segments index of each synapses.",
+        "cell_parameters": "firingRate is the average firing rate of excitatory/inhibitory presynaptic neurons, units are in Hz. multiSynapseCount is the number of synapses per connection. Markram et al. suggests excitatory cells may make up to 3.6 synapses/connections and inhibitory cells may make up to 13.9 synapses/connections. Here, we simply use 1 synapse/connection, but may be changed in the future."
+        "pas_mem_pars": "Ra is the axial resistance and has units of Ohm*cm. erev_leak is the reversal potential of the leak current in all compartments, and has units of mV. g_leak is the maximal conductance of the leak channels in all compartments, and has units of  S/cm^2.
+    },
+    },
+    "eCellParams": {
+        "firingRate": 0.5,
+        "multiSynapseCount": 1
+    },
+    "iCellParams": {
+        "firingRate": 2.5,
+        "multiSynapseCount": 1
+    },
+    "eiFraction": 0.85, 
+    "eSynParams": {
+        "idx": 0,
+        "e": 0,
+        "syntype": "Exp2Syn",
+        "tau1": 0.3,
+        "tau2": 1.8,
+        "weight": 0.0007,
+        "record_current": false
+    },
+    "iSynParams": {
+        "idx": 0,
+        "e":-80,
+        "syntype": "Exp2Syn",
+        "tau1": 1,
+        "tau2": 10,
+        "weight": 0.0007,
+        "record_current": false
+    },
+    "biophys_pars":
+        "pas_mem_pars":{
+            "Ra": 100,
+            "erev_leak": -58.5,
+            "g_leak": 0.0011
+        },
+        "activeSoma": false,
+        "shift": {
+            "L23E_oi24rpy1":  -14,
+            "L23I_oi38lbc1": -15,
+            "L4E_53rpy1": -15,
+            "L4E_j7_L4stellate": -15,
+            "L4I_oi26rbc1": -15,
+            "L5E_j4a": -7,
+            "L5E_oi15rpy4": -7,
+            "L5I_oi15rbc1": -10,
+            "L6E_51_2a_CNG": -7,
+            "L6E_oi15rpy4": -15,
+            "L6I_oi15rbc1": -5
+        },
+        "gnabar": {
+            "L23E_oi24rpy1":  0.60,
+            "L23I_oi38lbc1": 0.90,
+            "L4E_53rpy1": 0.60,
+            "L4E_j7_L4stellate": 0.90,
+            "L4I_oi26rbc1": 0.38,
+            "L5E_j4a": 0.5,
+            "L5E_oi15rpy4": 0.45,
+            "L5I_oi15rbc1": 0.66,
+            "L6E_51_2a_CNG": 0.25,
+            "L6E_oi15rpy4": 1.00,
+            "L6I_oi15rbc1": 0.6
+        },
+        "gkbar": {
+            "L23E_oi24rpy1":  0.5,
+            "L23I_oi38lbc1": 0.75,
+            "L4E_53rpy1": 0.5,
+            "L4E_j7_L4stellate": 0.75,
+            "L4I_oi26rbc1": 0.32,
+            "L5E_j4a": 0.42,
+            "L5E_oi15rpy4": 0.45,
+            "L5I_oi15rbc1": 0.55,
+            "L6E_51_2a_CNG": 0.20,
+            "L6E_oi15rpy4": 0.90,
+            "L6I_oi15rbc1": 0.5
+        }
+    }
+
+}
