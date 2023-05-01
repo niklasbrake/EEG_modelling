@@ -66,7 +66,7 @@ def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX=100):
     data = np.zeros([M*5,N])
     # Simulate neurons with given morphology
     for k,nrnID in enumerate(connection_data['cellIDs']):
-        cell = LFPy.Cell(nrnM.sectionList,v_init=parameters['pas_mem_pars']['erev_leak'],celsius=37)
+        cell = LFPy.Cell(nrnM.sectionList,v_init=parameters["biophys_pars"]['pas_mem_pars']['erev_leak'],celsius=37)
         cell.tstop = T_MAX
 
         # Add synapses to neuron model

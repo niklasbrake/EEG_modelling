@@ -2,9 +2,8 @@
 {
     "_comments": {
         "synapse_parameters": "Synaptic weight parameter is the maximal conductance of the synapse and has units of mS. Time scales have units of ms. e is the reversal potential of the synapse and has units of mV. Idx is a parameter that will be replaed by the segments index of each synapses.",
-        "cell_parameters": "firingRate is the average firing rate of excitatory/inhibitory presynaptic neurons, units are in Hz. multiSynapseCount is the number of synapses per connection. Markram et al. suggests excitatory cells may make up to 3.6 synapses/connections and inhibitory cells may make up to 13.9 synapses/connections. Here, we simply use 1 synapse/connection, but may be changed in the future."
-        "pas_mem_pars": "Ra is the axial resistance and has units of Ohm*cm. erev_leak is the reversal potential of the leak current in all compartments, and has units of mV. g_leak is the maximal conductance of the leak channels in all compartments, and has units of  S/cm^2.
-    },
+        "cell_parameters": "firingRate is the average firing rate of excitatory/inhibitory presynaptic neurons, units are in Hz. multiSynapseCount is the number of synapses per connection. Markram et al. suggests excitatory cells may make up to 3.6 synapses/connections and inhibitory cells may make up to 13.9 synapses/connections. Here, we simply use 1 synapse/connection, but may be changed in the future.",
+        "pas_mem_pars": "Ra is the axial resistance and has units of Ohm*cm. erev_leak is the reversal potential of the leak current in all compartments, and has units of mV. g_leak is the maximal conductance of the leak channels in all compartments, and has units of  S/cm^2."
     },
     "eCellParams": {
         "firingRate": 0.5,
@@ -14,7 +13,7 @@
         "firingRate": 2.5,
         "multiSynapseCount": 1
     },
-    "eiFraction": 0.85, 
+    "eiFraction": 0.87,
     "eSynParams": {
         "idx": 0,
         "e": 0,
@@ -33,7 +32,7 @@
         "weight": 0.0007,
         "record_current": false
     },
-    "biophys_pars":
+    "biophys_pars":{
         "pas_mem_pars":{
             "Ra": 100,
             "erev_leak": -58.5,

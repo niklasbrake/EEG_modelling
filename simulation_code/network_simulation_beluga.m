@@ -28,8 +28,6 @@ classdef network_simulation_beluga
         neuronTypes = {'L23E_oi24rpy1';'L23I_oi38lbc1';'L23I_oi38lbc1';'L4E_53rpy1';'L4E_j7_L4stellate';'L4E_j7_L4stellate';'L4I_oi26rbc1';'L4I_oi26rbc1';'L5E_oi15rpy4';'L5E_j4a';'L5I_oi15rbc1';'L5I_oi15rbc1';'L6E_51_2a_CNG';'L6E_oi15rpy4';'L6I_oi15rbc1';'L6I_oi15rbc1'};
         nrnAbundance = [26.8,3.2,4.3,9.5,9.5,9.5,5.6,1.5,4.9,1.3,0.6,0.8,14,4.6,1.9,1.9]/100
         dendriteLengths = [9319,4750,4750,7169,4320,4320,2359,2359,14247,5720,5134,5134,5666,6183,5134,5134];
-        activeConductances = false
-        inSynParamChanges = 0
         synapseCount
         morphoCounts
         correlationFile
@@ -37,14 +35,19 @@ classdef network_simulation_beluga
 
     methods
 
-        function obj = network_simulation_beluga(outputPath)
+        function obj = network_simulation_beluga(outputPath,pars)
             warning('off','MATLAB:MKDIR:DirectoryExists')
 
-            % Import all network parameters from JSON file
-            fid = fopen(fullfile(network_simulation_beluga.functionFolder,'mod_files','default_parameters.json'));
-            str = char(fread(fid,inf)');
-            fclose(fid);
-            obj.parameters = jsondecode(str);
+            if(nargin<2)
+                % Import all network parameters from JSON file
+                fid = fopen(fullfile(network_simulation_beluga.functionFolder,'mod_files','default_parameters.json'));
+                str = char(fread(fid,inf)');
+                fclose(fid);
+                obj.parameters = jsondecode(str);
+            else
+                % Take parameter input argument
+                obj.parameters = pars;
+            end
 
             % Create file strcture for model outputs.
             if(nargin>0)
@@ -96,6 +99,10 @@ classdef network_simulation_beluga
             dipoles = dipoles(2:end,:,:);
         end
 
+        function x = getMorphoCount(obj)
+            x = obj.morphoCounts;
+        end
+
         function obj = initialize_postsynaptic_network(obj,neuronCount,randMorphos)
         % Initalizes postsynapse network by drawing neuron morphologies and creating empty
         % neuron classes to be filled upon simulation.
@@ -107,7 +114,7 @@ classdef network_simulation_beluga
             end
 
             % Get distribution of mTypes
-            synapseDist = obj.dendriteLengths*1.15;
+            synapseDist = obj.dendriteLengths*1/obj.parameters.eiFraction;
             mTypes = unique(obj.neuronTypes);
             mTypeCount = accumarray(findgroups(obj.neuronTypes),obj.nrnAbundance);
             mTypeSynapseCount = splitapply(@mean,synapseDist(:),findgroups(obj.neuronTypes));
@@ -185,16 +192,6 @@ classdef network_simulation_beluga
                 coordination_index = 0;
             end
 
-            % Get IDs for multiple synapses/connection (ensure they end up on the same postsyanptic neurons)
-            if(exist(fullfile(obj.preNetwork,'multisynapse_IDs.csv')))
-                multID = csvread(fullfile(obj.preNetwork,'multisynapse_IDs.csv'));
-            else
-                multID = -ones(obj.synapseCount,1);
-            end
-            mutliK = obj.parameters.eiFraction*obj.parameters.eCellParams.multiSynapseCount+(1-obj.parameters.eiFraction)*obj.parameters.iCellParams.multiSynapseCount;
-            multiN = ceil(min(sum(multID==-1),obj.synapseCount)/mutliK);
-            parentSynapses = find(multID==-1);
-
             % Load neuron segment locations projected onto sphere
             if(~exist(obj.mTypeSegmentationData));
                 wd = mfilename('fullpath');
@@ -218,20 +215,6 @@ classdef network_simulation_beluga
                 neuronArea(i) = sum(mData.area);
             end
 
-            % If the syanpses are not placed randomly, perform UMAP on spike train correlation matrix to embed functionally similar presynaptic neurons close to each other
-            % Location of synaspes are perturbed away from optimal positions by an amount determined by coordination_index between 0 and 1.
-            if(coordination_index>0)
-                [synapseEmbedding,idPreSyn] = network_simulation_beluga.loadSynapseLocations(fullfile(obj.preNetwork,'UMAP_embedding.csv'),obj.synapseCount);
-                synapseEmbedding = network_simulation_beluga.perturbSynapsePositions(synapseEmbedding,1-coordination_index);
-                [theta,phi] = cart2sph(synapseEmbedding(:,1),synapseEmbedding(:,2),synapseEmbedding(:,3));
-            else
-                M = length(multID);
-                theta = asin(2*rand(M,1)-1);
-                phi = 2*pi*rand(M,1);
-                idPreSyn = 1:M;
-            end
-            synapseEmbedding = [phi(:),theta(:)];
-
             % Assign presynaptic neurons to postsynaptic neurons based on total surface area
             % postNeuronList = zeros(obj.synapseCount,1);
             if(length(obj.neurons)>1)
@@ -241,74 +224,100 @@ classdef network_simulation_beluga
                 postNeuronList = ones(obj.synapseCount,1);
             end
 
-            % Greedy algorithm. Draw dendrites segments and select closest synapse
-            segmentList = zeros(obj.synapseCount,1);
-            synapseList = zeros(obj.synapseCount,1);
-            remainingSyns = true(length(parentSynapses),1);
-            multiSynapses = cell(length(obj.neurons),1);
-            totalSynapseCount = 0;
-            count = 1;
-            N = length(parentSynapses);
-            while( (count <= N) && (totalSynapseCount <= obj.synapseCount) )
-                % Choose random dendrite segment based on surface area
-                postNeuron = postNeuronList(count);
-                segment = interp1(dendriteAreaCDF{postNeuron},1:length(dendriteAreaCDF{postNeuron}),rand,'next','extrap');
-
-                % Choose presynaptic neuron
-                if(any(isnan(dendriteEmbedding{postNeuron}(segment,:))))
-                    % If segment is soma, choose a synapse uniformly
-                    iClosest = randsample(find(remainingSyns),1);
-                else
-                    % Find presynaptic neuron closest to segment
-                    D = 1-haversine_distance(dendriteEmbedding{postNeuron}(segment,:),synapseEmbedding(parentSynapses,:));
-                    [~,iClosest] = max(D.*remainingSyns);
+            % If the syanpses are not placed randomly, perform UMAP on spike train correlation matrix to embed functionally similar presynaptic neurons close to each other
+            % Location of synaspes are perturbed away from optimal positions by an amount determined by coordination_index between 0 and 1.
+            if(coordination_index==0)
+                synapseList = randperm(obj.synapseCount);
+                for j = 1:length(saCDF)
+                    idcs = find(postNeuronList==j);
+                    tempSegs = interp1(dendriteAreaCDF{j},1:length(dendriteAreaCDF{j}),rand(length(idcs),1),'next','extrap');
+                    segmentList(idcs) = tempSegs;
                 end
-                remainingSyns(iClosest) = false;
-                parentSynapseID = idPreSyn(parentSynapses(iClosest));
+            else
+                [synapseEmbedding,idPreSyn] = network_simulation_beluga.loadSynapseLocations(fullfile(obj.preNetwork,'UMAP_embedding.csv'),obj.synapseCount);
+                synapseEmbedding = network_simulation_beluga.perturbSynapsePositions(synapseEmbedding,1-coordination_index);
+                [theta,phi] = cart2sph(synapseEmbedding(:,1),synapseEmbedding(:,2),synapseEmbedding(:,3));
+                synapseEmbedding = [phi(:),theta(:)];
 
-                % Form synapse
-                postNeuronList(count) = postNeuron;
-                segmentList(count) = segment;
-                synapseList(count) = parentSynapseID;
-                count = count + 1;
+                % Get IDs for multiple synapses/connection (ensure they end up on the same postsyanptic neurons)
+                if(exist(fullfile(obj.preNetwork,'multisynapse_IDs.csv')))
+                    multID = csvread(fullfile(obj.preNetwork,'multisynapse_IDs.csv'));
+                else
+                    multID = -ones(size(synapseEmbedding,1),1);
+                end
+                mutliK = obj.parameters.eiFraction*obj.parameters.eCellParams.multiSynapseCount+(1-obj.parameters.eiFraction)*obj.parameters.iCellParams.multiSynapseCount;
+                multiN = ceil(min(sum(multID==-1),obj.synapseCount)/mutliK);
+                parentSynapses = find(multID==-1);
 
-                % Find all other terminals from presynaptic neuron
-                multiSynapses{postNeuron} = [multiSynapses{postNeuron};find(multID(:)==parentSynapseID)];
-                totalSynapseCount = length(cat(1,multiSynapses{:}))+count;
-            end
+                % Greedy algorithm. Draw dendrites segments and select closest synapse
+                segmentList = zeros(obj.synapseCount,1);
+                synapseList = zeros(obj.synapseCount,1);
+                remainingSyns = true(length(parentSynapses),1);
+                multiSynapses = cell(length(obj.neurons),1);
+                totalSynapseCount = 0;
+                count = 1;
+                N = length(parentSynapses);
+                while( (count <= N) && (totalSynapseCount <= obj.synapseCount) )
+                    % Choose random dendrite segment based on surface area
+                    postNeuron = postNeuronList(count);
+                    segment = interp1(dendriteAreaCDF{postNeuron},1:length(dendriteAreaCDF{postNeuron}),rand,'next','extrap');
 
-            if(totalSynapseCount<obj.synapseCount)
-                disp('Warning: fewer presyanptic synapses than expected. Reducing syanpse count. Presyanptic network size too small?');
-                postNeuronList = postNeuronList(1:count-1);
-                segmentList = segmentList(1:count-1);
-                synapseList = synapseList(1:count-1);
-                obj.synapseCount = totalSynapseCount;
-            end
-
-            % For each postsynaptic neuron, draw segments and add multisynapses
-            for postNeuron = 1:length(obj.neurons)
-                % Total number of multisynapses
-                multiSyns = multiSynapses{postNeuron};
-                allSegments = interp1(dendriteAreaCDF{postNeuron},1:length(dendriteAreaCDF{postNeuron}),rand(1,length(multiSyns)),'next','extrap');
-                remainingSyns = true(length(multiSyns),1);
-                for segment = allSegments
                     % Choose presynaptic neuron
                     if(any(isnan(dendriteEmbedding{postNeuron}(segment,:))))
                         % If segment is soma, choose a synapse uniformly
                         iClosest = randsample(find(remainingSyns),1);
                     else
                         % Find presynaptic neuron closest to segment
-                        D = 1-haversine_distance(dendriteEmbedding{postNeuron}(segment,:),synapseEmbedding(multiSyns,:));
+                        D = 1-haversine_distance(dendriteEmbedding{postNeuron}(segment,:),synapseEmbedding(parentSynapses,:));
                         [~,iClosest] = max(D.*remainingSyns);
                     end
                     remainingSyns(iClosest) = false;
-                    parentSynapseID = idPreSyn(multiSyns(iClosest));
+                    parentSynapseID = idPreSyn(parentSynapses(iClosest));
 
                     % Form synapse
                     postNeuronList(count) = postNeuron;
                     segmentList(count) = segment;
                     synapseList(count) = parentSynapseID;
                     count = count + 1;
+
+                    % Find all other terminals from presynaptic neuron
+                    multiSynapses{postNeuron} = [multiSynapses{postNeuron};find(multID(:)==parentSynapseID)];
+                    totalSynapseCount = length(cat(1,multiSynapses{:}))+count;
+                end
+
+                if(totalSynapseCount<obj.synapseCount)
+                    disp('Warning: fewer presyanptic synapses than expected. Reducing syanpse count. Presyanptic network size too small?');
+                    postNeuronList = postNeuronList(1:count-1);
+                    segmentList = segmentList(1:count-1);
+                    synapseList = synapseList(1:count-1);
+                    obj.synapseCount = totalSynapseCount;
+                end
+
+                % For each postsynaptic neuron, draw segments and add multisynapses
+                for postNeuron = 1:length(obj.neurons)
+                    % Total number of multisynapses
+                    multiSyns = multiSynapses{postNeuron};
+                    allSegments = interp1(dendriteAreaCDF{postNeuron},1:length(dendriteAreaCDF{postNeuron}),rand(1,length(multiSyns)),'next','extrap');
+                    remainingSyns = true(length(multiSyns),1);
+                    for segment = allSegments
+                        % Choose presynaptic neuron
+                        if(any(isnan(dendriteEmbedding{postNeuron}(segment,:))))
+                            % If segment is soma, choose a synapse uniformly
+                            iClosest = randsample(find(remainingSyns),1);
+                        else
+                            % Find presynaptic neuron closest to segment
+                            D = 1-haversine_distance(dendriteEmbedding{postNeuron}(segment,:),synapseEmbedding(multiSyns,:));
+                            [~,iClosest] = max(D.*remainingSyns);
+                        end
+                        remainingSyns(iClosest) = false;
+                        parentSynapseID = idPreSyn(multiSyns(iClosest));
+
+                        % Form synapse
+                        postNeuronList(count) = postNeuron;
+                        segmentList(count) = segment;
+                        synapseList(count) = parentSynapseID;
+                        count = count + 1;
+                    end
                 end
             end
 
@@ -839,4 +848,26 @@ function d = haversine_distance(p1,x)
 end
 function d = hav(x)
     d = (1-cos(x))/2;
+end
+function [x1,x2] = getOrthBasis(x0)
+    x0 = x0/norm(x0,2);
+    if(prod(size(x0))==3)
+        if(x0>0.9)
+            x1 = [0,1,0];
+        else
+            x1 = [1,0,0];
+        end
+        x1 = x1-x0*sum(x1.*x0);
+        x1 = x1/norm(x1,2);
+        x2 = cross(x1,x0);
+    else
+        idcs = x0(:,1)>0.9;
+        x1 = zeros(size(x0));
+        x1(idcs,2) = 1;
+        x1(~idcs,1) = 1;
+
+        x1 = x1-x0.*sum(x1.*x0,2);
+        x1 = x1./vecnorm(x1,2,2);
+        x2 = cross(x1,x0);
+    end
 end
