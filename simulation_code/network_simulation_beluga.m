@@ -185,6 +185,19 @@ classdef network_simulation_beluga
             network_simulation_beluga.save_presynaptic_network(neuronIDs,spikeTime,ei,obj.synapseCount,obj.spikingFile);
         end
 
+        function mData = getmData(network)
+            % if(~exist(network.mTypeSegmentationData));
+            %     wd = mfilename('fullpath');
+            %     error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
+            % end
+            load(network.mTypeSegmentationData);
+            for i = 1:length(network.neurons)
+                mData{i} = nrnSegs.(network.neurons(i).mType);
+                mData{i}.pos = [mean(mData{i}.x,2), ...
+                    mean(mData{i}.y,2), ...
+                    mean(mData{i}.z,2)];
+            end
+        end
         function obj = form_connections(obj,coordination_index)
         % Places synapses such that correlated synapses are placed in dendrite segments with similar directions relative to the soma
 
@@ -214,11 +227,11 @@ classdef network_simulation_beluga
                 dendriteAreaCDF{i} = cumsum(mData.area)/sum(mData.area);
                 neuronArea(i) = sum(mData.area);
             end
+            saCDF = cumsum(neuronArea)/sum(neuronArea);
 
             % Assign presynaptic neurons to postsynaptic neurons based on total surface area
             % postNeuronList = zeros(obj.synapseCount,1);
             if(length(obj.neurons)>1)
-                saCDF = cumsum(neuronArea)/sum(neuronArea);
                 postNeuronList = interp1(saCDF,1:length(saCDF),rand(obj.synapseCount,1),'next','extrap');
             else
                 postNeuronList = ones(obj.synapseCount,1);
@@ -681,7 +694,6 @@ classdef network_simulation_beluga
             csvwrite(fullfile(obj.preNetwork,'multisynapse_IDs.csv'),parents(:));
             network_simulation_beluga.save_presynaptic_network(ids,ts,ei,N,obj.spikingFile)
         end
-
     end
 
     methods (Static)
@@ -831,6 +843,7 @@ classdef network_simulation_beluga
         function d = haversine_distance2(y,x)
             d = hav(y(:,1)-x(:,1))+(1-hav(x(:,1)-y(:,1))-hav(y(:,1)+x(:,1))).*hav(y(:,2)-x(:,2));
         end
+
     end
 end
 function prints = pySimulate(params,pyFun)
