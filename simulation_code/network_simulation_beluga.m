@@ -68,6 +68,41 @@ classdef network_simulation_beluga
             obj.synapseCount = N;
         end
 
+        function obj = rebaseNetwork(obj,outputPath)
+            obj.outputPath = outputPath;
+            obj.postNetwork = fullfile(outputPath,'postsynaptic_network');
+            obj.preNetwork = fullfile(outputPath,'presynaptic_network');
+            obj.correlationFile = fullfile(obj.preNetwork,'correlations.csv');
+            obj.savePath = fullfile(obj.outputPath,'simulation');
+            obj.spikingFile = fullfile(outputPath,'presynaptic_network','spikeTimes.csv');
+            obj = obj.resetResourceFolder;
+            fid = fopen(fullfile(obj.postNetwork,'mTypes.txt'),'r');
+            txt = textscan(fid,'%s');
+            fclose(fid);
+            mTypes = txt{1};
+            for i = 1:length(mTypes)
+                [~,mType{i}] = fileparts(mTypes{i});
+            end
+
+            fid = fopen(fullfile(obj.postNetwork,'mTypes.txt'),'w');
+            for i = 1:length(mType)
+                mPath = fullfile(obj.morphologyPath,[mType{i} '.swc']);
+                if(strcmp(filesep,'\'))
+                    mPath = strrep(mPath,'\','/');
+                end
+                fprintf(fid,'%s\n',mPath);
+            end
+            fclose(fid);
+        end
+        function obj = resetResourceFolder(obj)
+            obj.morphologyPath = fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','swc');
+            obj.mTypeSegmentationData = fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','morphology_segmentations.mat');
+            obj.simulateFunction = fullfile(network_simulation_beluga.functionFolder,'compute_network_dipoles_beluga.py');
+            obj.convertFilesFunction = fullfile(network_simulation_beluga.functionFolder,'np2mat.py');
+            obj.correlationFunction = fullfile(network_simulation_beluga.functionFolder,'compute_tiling_correlation.exe');
+            obj.embeddingFunction = fullfile(network_simulation_beluga.functionFolder,'embed_data.py');
+        end
+
         function N = getsynapsecount(obj)
             N = obj.synapseCount;
         end
@@ -186,10 +221,10 @@ classdef network_simulation_beluga
         end
 
         function mData = getmData(network)
-            % if(~exist(network.mTypeSegmentationData));
-            %     wd = mfilename('fullpath');
-            %     error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
-            % end
+            if(~exist(network.mTypeSegmentationData));
+                wd = mfilename('fullpath');
+                error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
+            end
             load(network.mTypeSegmentationData);
             for i = 1:length(network.neurons)
                 mData{i} = nrnSegs.(network.neurons(i).mType);
