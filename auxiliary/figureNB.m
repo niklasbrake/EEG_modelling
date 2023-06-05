@@ -1,7 +1,7 @@
 function varargout = figureNB(x,y)
     if(nargin==0)
-        x=8;
-        y=8;
+        x=8.9;
+        y=8.9;
     end
     set(0,'units','centimeters');
     SS = get(0,'screensize');

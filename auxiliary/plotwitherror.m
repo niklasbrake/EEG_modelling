@@ -1,4 +1,4 @@
-function h =plotwitherror(x,y,isstdrr,varargin)
+function [h,F] =plotwitherror(x,y,isstdrr,varargin)
 
 	if(strcmp(isstdrr,'CI') | isstdrr == true)
 		ymu = nanmean(y,2);
@@ -39,7 +39,6 @@ function h =plotwitherror(x,y,isstdrr,varargin)
 			end
 		end
 	end
-
 	for i = 1:length(region)
 		xfvec = [x(region{i}),flip(x(region{i}))];
 		yfvec = [ylo(region{i});flip(yhi(region{i}))];
