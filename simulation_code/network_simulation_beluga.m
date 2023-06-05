@@ -400,7 +400,7 @@ classdef network_simulation_beluga
                 error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
             end
 
-            params = strjoin({postNetwork,obj.spikingFile,savePath,int2str(obj.tmax)});
+            params = strjoin({char(postNetwork),char(obj.spikingFile),char(savePath),char(int2str(obj.tmax))});
 
             str = jsonencode(obj.parameters);
             fid = fopen(fullfile(obj.savePath,'_parameters.json'),'w');
@@ -417,6 +417,27 @@ classdef network_simulation_beluga
             pySimulate(obj.savePath,fullfile(functionFolder,'npy2mat.py'));
 
             obj.save();
+        end
+
+        function [ids,ts,ei] = sample_spike_rate(obj,lamFun,N)
+            mE = floor(N*obj.parameters.eiFraction);
+            mI = N-mE;
+            lamE = poissrnd(obj.parameters.eCellParams.firingRate*obj.tmax*1e-3*mE);
+            lamI = poissrnd(obj.parameters.iCellParams.firingRate*obj.tmax*1e-3*mI);
+
+            t = 0:obj.tmax;
+            lam = lamFun(t);
+
+            L = cumsum(lam)/sum(lam);
+            [lam,I] = unique(L);
+            tsE = interp1(lam,t(I),rand(lamE,1),'next','extrap');
+            idsE = randi(mE,lamE,1);
+            tsI = interp1(lam,t(I),rand(lamI,1),'next','extrap');
+            idsI = randi(mI,lamI,1)+mE;
+
+            ids = [idsE;idsI];
+            ts = [tsE;tsI];
+            ei = [zeros(mE,1);ones(mI,1)];
         end
 
         function obj = compute_presynaptic_correlations(obj,spikingFile)
@@ -882,6 +903,8 @@ classdef network_simulation_beluga
     end
 end
 function prints = pySimulate(params,pyFun)
+    pyFun = char(pyFun);
+    params = char(params);
     [err,prints] = system(['python "' pyFun '" ' params]);
     if(err)
         error(prints);
