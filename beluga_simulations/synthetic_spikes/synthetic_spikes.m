@@ -1,16 +1,33 @@
-% Set path and folder
-% folder = '/lustre04/scratch/nbrake/data/simulations/synthetic_spikes';
-folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test\synth_spikes';
+function synthetic_spikes(comboID)
+
+for rValue = 1:11
+    main(comboID,rValue);
+end
+function main(comboID,rValue)
 addpath('/lustre04/scratch/nbrake/code/simulation_code');
 
+if(nargin<1)
+    comboID = 13;
+end
+
+parpool(40);
+
+mCombos = zeros(11*10/2,2);
+count = 1;
+for i = 1:11
+    for j = i+1:11
+        mCombos(count,:) = [i,j];
+        count = count+1;
+    end
+end
+folder = ['/lustre04/scratch/nbrake/data/simulations/synthetic_spikes/mCombo' int2str(comboID) '_R' int2str(rValue)];
+% folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test\synth_spikes';
+
 % Initialize network
-nPostNeurons = 2;
-mTypes = 5;
 network = network_simulation_beluga(folder);
-network = network.initialize_postsynaptic_network(nPostNeurons,5*ones(nPostNeurons,1));
-network = network.setsynapsecount(500);
+network = network.initialize_postsynaptic_network(2,mCombos(comboID,:));
 N = network.getsynapsecount;
-network.tmax = 2e3;
+network.tmax = 10e3;
 
 % Distribute synapses across dendrites and get locations
 network = network.form_connections(0);
@@ -20,7 +37,7 @@ mData = network.getmData;
 P = arrayfun(@(i,j) mData{i}.pos(j,:),cons(:,1),cons(:,2),'UniformOutput',false);
 P = cat(1,P{:});
 [thet,phi] = cart2sph(P(:,1),P(:,2),P(:,3));
-X = [thet(:),phi(:)];
+X = [phi(:),thet(:)];
 
 % Define excitatory/inhibitory cells and avg. firing rates
 dt = 1;
@@ -29,7 +46,10 @@ r = (network.parameters.eCellParams.firingRate*(1-ei) + network.parameters.iCell
 rVar = r.*(1-r);
 
 % Max correlation
-R = 0.2;
+% R = 0.2;
+rRange = linspace(0,1,11);
+R = rRange(rValue);
+
 
 % Use haversine distance among synapses to construct covariance matrix
 KxxCell = cell(N,3); % Store sparse cov matrix (i,j,v) for every synapse
@@ -57,7 +77,7 @@ end
 L = sparse(i0,j0,A,N,N);
 L = L+L'+eye(N);
 L0 = nearcorr(L);
-save(fullfile(network.preNetwork,'covariance.mat'),'L0','ei');
+save(fullfile(network.preNetwork,'covariance.mat'),'L0','ei','-v7.3');
 clearvars L S i0 j0 KxxCell A
 
 % Sample spikes using a discretized Gaussian
@@ -78,5 +98,6 @@ ids = synIDs(ids);
 ei = ei(I);
 
 network_simulation_beluga.save_presynaptic_network(ids,ts,ei,N,network.spikingFile);
-
-network.simulate();
+network.save();
+% network.simulate();
+end
