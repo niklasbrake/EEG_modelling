@@ -17,8 +17,9 @@ function sampled_parameters = sample_parameter_space(N)
     samplePars = @(P) [lambda_E(P(:,1)), lambda_I(P(:,2)), tauE(P(:,3)), ...
                         tauI(P(:,4)), erev(P(:,5)), gleak(P(:,6)), mType(P(:,7))];
 
-    LH = lhsdesign(100,7);
+    LH = lhsdesign(N,7);
     PARS = samplePars(LH);
 
     sampled_parameters = array2table(PARS);
     sampled_parameters.Properties.VariableNames = {'eCellParams.firingRate','iCellParams.firingRate','eSynParams.tau2','iSynParams.tau2','biophys_pars.pas_mem_pars.erev_leak','biophys_pars.pas_mem_pars.g_leak','mType'};
+end
