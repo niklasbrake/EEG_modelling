@@ -133,6 +133,7 @@ dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 sims = load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
 load(fullfile(dataFolder,'simulation_passive_different_tau_decay.mat'),'GABAR_tau','spectra_fitted_tau');
 
+idcs = find(sims.f<100);
 [params,synFun] = synDetrend(sims.f(sims.f<100),mean(sims.P(sims.f<100,:),2)./mean(sims.P(1,:)),0,'lorenz',[15e-3,1e-3,0,-1]);
 
 % figureNB;
@@ -350,3 +351,101 @@ P_baseline_osc = data.P(:,:,7);
 P_tau_osc = data.P(:,:,8);
 P_tau = data.P(:,:,9);
 P_crit_osc = data.P(:,:,10);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tau1 = zeros(50,6);
+for j = 1:6
+    for i = 1:50
+        idcs = randi(100,100,1);
+        P_AMPA(:,i) = mean(data.tauE.P(:,idcs,j),2);
+    end
+    [params,synFun] = synDetrend(f,P_AMPA./P_AMPA(1,:),0,'lorenz',[15e-3,1e-3,0,-1]);
+    tau1(:,j) = params(:,2)*1e3;
+end
+
+tau2 = zeros(50,6);
+for j = 1:6
+    for i = 1:50
+        idcs = randi(100,100,1);
+        P_GABA(:,i) = mean(data.tauI.P(:,idcs,j),2);
+    end
+    [params,synFun] = synDetrend(f,P_GABA./P_GABA(1,:),0,'lorenz',[15e-3,1e-3,0,-1]);
+    tau2(:,j) = params(:,1)*1e3;
+end
+
+
+dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
+sims = load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
+idcs = find(sims.f<100);
+p_fit = mean(sims.P(idcs,:)./mean(sims.P(1,:)),2);
+[params,synFun] = synDetrend(sims.f(idcs),p_fit,0,'lorenz',[15e-3,1e-3,0,-1]);
+figureNB;
+    plot(sims.f,mean(sims.P,2),'k','LineWidth',1);
+    hold on;
+    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:3),-Inf]),'--r');
+    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:2),-Inf,params(4)]),'--r');
+    ylim([10^-16.5,10^-14.5]);
+    yticks([1e-16,1e-15])
+    set(gca,'yscale','log');
+    set(gca,'xscale','log')
+    xticks([1,10,100]);
+    xticklabels([1,10,100]);
+    xlabel('Frequency (Hz)');
+    ylabel(['PSD (' char(956) 'V^2/Hz)'])
+    xlim([1,100])
+    gcaformat;
+    text(1.4,2e-15,'\tau_1','FontSize',7,'color','r')
+    text(1.4,9e-17,'\tau_2','FontSize',7,'color','r')
+
+figureNB(9.6,2.9);
+subplot(1,3,1);
+    plot(sims.f,mean(sims.P,2),'k','LineWidth',1);
+    hold on;
+    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:3),-Inf]),'--r');
+    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:2),-Inf,params(4)]),'--r');
+    ylim([10^-16.5,10^-14.5]);
+    yticks([1e-16,1e-15])
+    set(gca,'yscale','log');
+    set(gca,'xscale','log')
+    xticks([1,10,100]);
+    xticklabels([1,10,100]);
+    xlabel('Frequency (Hz)');
+    ylabel(['PSD (' char(956) 'V^2/Hz)'])
+    xlim([1,100])
+    gcaformat;
+    text(1.4,2e-15,'\tau_1','FontSize',7,'color','r')
+    text(1.4,9e-17,'\tau_2','FontSize',7,'color','r')
+subplot(1,3,2);
+    x = repmat(data.tauI.par,[50,1]);
+    FT = fitlm(x(:),tau2(:));
+    plot(x,tau2,'.k','MarkerSize',4); hold on;
+    plot([0,max(x)],FT.predict([0,max(x)]'),'color','r','LineWidth',1);
+    xlabel('GABAR \tau_I (ms)');
+    ylabel('\tau_1 (ms)');
+    gcaformat
+subplot(1,3,3);
+    x = repmat(data.tauE.par,[50,1]);
+    FT = fitlm(x(:),tau1(:));
+    plot(x,tau1,'.k','MarkerSize',4); hold on;
+    plot([0,max(x)],FT.predict([0,max(x)]'),'color','r','LineWidth',1);
+    xlabel('AMPAR \tau_E (ms)');
+    ylabel('\tau_2 (ms)');
+    gcaformat
