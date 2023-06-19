@@ -14,6 +14,34 @@ network = network.initialize_postsynaptic_network(nPostNeurons);
 nPreNeurons = 30e3;
 network.tmax = 10e3; % 2 seconds
 
+
+[ids,ts,~,B,t] = network.simulatespikes(m);
+
+tvec = 0:0.1:network.tmax;
+X1 = zeros(M,length(tvec));
+X2 = zeros(M,length(tvec));
+waitbar(0);
+for j = 1:M
+    waitbar(j/M);
+    t0 = ts(ids==j);
+    idcs = interp1(tvec,1:length(tvec),t0,'nearest','extrap');
+    X1(j,idcs) = 1;
+    X1(j,:) = filter(AP_waveform,1,X1(j,:));
+
+    t1 = rand(size(t0))*network.tmax;
+    idcs = interp1(tvec,1:length(tvec),t1,'nearest','extrap');
+    X2(j,idcs) = 1;
+    X2(j,:) = filter(AP_waveform,1,X2(j,:));
+end
+figureNB(12,7.7);
+subplot(2,1,1);
+    plot(sum(X1),'k')
+    xlim([1,10e4])
+    ylim([-1,11]*1e-6);
+subplot(2,1,2);
+    raster(ids,ts,gcf);
+
+
 figureNB;
 
 mValues = linspace(0.86,0.99,5);
