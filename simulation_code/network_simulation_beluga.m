@@ -431,9 +431,19 @@ classdef network_simulation_beluga
             L = cumsum(lam)/sum(lam);
             [lam,I] = unique(L);
             tsE = interp1(lam,t(I),rand(lamE,1),'next','extrap');
-            idsE = randi(mE,lamE,1);
             tsI = interp1(lam,t(I),rand(lamI,1),'next','extrap');
-            idsI = randi(mI,lamI,1)+mE;
+
+
+            if(mE==0)
+                idsE = [];
+            else
+                idsE = randi(mE,lamE,1);
+            end
+            if(mI==0)
+                idsI = [];
+            else
+                idsI = randi(mI,lamI,1)+mE;
+            end
 
             ids = [idsE;idsI];
             ts = [tsE;tsI];
