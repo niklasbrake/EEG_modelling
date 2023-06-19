@@ -11,6 +11,7 @@ tauERange = [1:0.5:3.5];
 erevRange = [-70:5:-45];
 eFiringRange = round(10.^linspace(-1,1,6),2,'significant');
 iFiringRange = round(10.^linspace(0,log10(20),6),2,'significant');
+g_leak = round(10.^linspace(-4.5,-2.5,6),2,'significant');
 
 clrs = clrsPT.sequential(10);
 clrs = clrs(5:end,:);
@@ -39,15 +40,15 @@ for i = 1:length(F)
             clr = interp1(tauIRange,clrs,results.pars.iSynParams.tau2);
             parValue(i) = results.pars.iSynParams.tau2;
             Ptemp = results.P;
-            % [params,synFun] = synDetrend(f,mean(Ptemp,2)./mean(Ptemp(1,:),2),0,'lorenz',[15e-3,1e-3,0,-1]);
-            % tauI(results.j) = params(1)*1e3
+            [params,synFun] = synDetrend(f,mean(Ptemp,2)./mean(Ptemp(1,:),2),0,'lorenz',[15e-3,1e-3,0,-1]);
+            tauI(results.j) = params(1)*1e3
         case 'tauE'
             set(gca,'CLim',[min(tauERange),max(tauERange)]);
             clr = interp1(tauERange,clrs,results.pars.eSynParams.tau2);
             parValue(i) = results.pars.eSynParams.tau2;
             Ptemp = results.P;
-            % [params,synFun] = synDetrend(f,mean(Ptemp,2)./mean(Ptemp(1,:),2),0,'lorenz',[15e-3,1e-3,0,-1]);
-            % tauE(results.j) = params(2)*1e3
+            [params,synFun] = synDetrend(f,mean(Ptemp,2)./mean(Ptemp(1,:),2),0,'lorenz',[15e-3,1e-3,0,-1]);
+            tauE(results.j) = params(2)*1e3
         case 'iFiring'
             set(gca,'CLim',[min(iFiringRange),max(iFiringRange)]);
             clr = interp1(iFiringRange,clrs,results.pars.iCellParams.firingRate);

@@ -1,28 +1,32 @@
-load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E_connections.mat')
+function fig = render_neuron_morphology(mType)
+
+mTypes ={'L23E_oi24rpy1';'L23I_oi38lbc1';'L4E_53rpy1';'L4E_j7_L4stellate';'L4I_oi26rbc1';'L5E_j4a';'L5E_oi15rpy4';'L5I_oi15rbc1';'L6E_51_2a_CNG';'L6E_oi15rpy4';'L6I_oi15rbc1'};
+
+if(isnumeric(mType))
+    mType = mTypes{mType}
+end
+
+folder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\matlab_morph_data';
+
+load(fullfile(folder,[mType '_connections.mat']));
 connections = connections+1;
-load('E:\Research_Projects\004_Propofol\data\simulations\raw\dendrite_voltages\LFPy\voltage_data.mat')
-load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E.mat')
-X = csvread('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E.csv');
+
+X = csvread(fullfile(folder,[mType '_segments.csv']));
 for i=  1:size(X,1)
     segs{i} = X(i,X(i,:)~=0);
 end
 
 
-% To get the section -> segment map, go to python and do
-% for i in range(cell.totnsegs):
-%    secNames.append(cell.get_idx_name(i)[1])
-% Then average over each segment to get the section voltages
 
-% data(:,6) = max(data(:,6),0.5);
-
-V = [vDend,vSoma];
-V2 = resample(V,1e3,16e3);
-t = (1:size(V2,1));
+data(:,6) = max(data(:,6),0.5);
 xSoma = data(data(:,2)==1,3:6);
+data(:,3:5) = data(:,3:5) - mean(xSoma(:,1:3));
+xSoma(:,1:3) = xSoma(:,1:3)-mean(xSoma(:,1:3));
 
 gridSize = @(d) floor(d.^2./(3+d.^2)*18+3);
-figureNB(12,18);
+fig = figureNB(12,18);
 axes('Position',[0,0,1,1]);
+view([0,0]);
 view([0,0]);
 hold on
 set(gca,'DataAspectRatio',[1,1,1]);
@@ -30,6 +34,9 @@ gcaformat_dark
 axis off;
 set(gca,'CLim',[0,1]);
 colormap('gray');
+
+xSynapses = cell(length(segs)+1,1);
+ei = cell(length(segs)+1,1);
 for i = 1:length(segs)
     idcs = segs{i};
     % M(i) = max(data(idcs,6));
@@ -62,26 +69,48 @@ for i = 1:length(segs)
     % xSegment = [x0;xSegment];
 
     N = gridSize(max(xSegment(:,end)));
-    render_segment(xSegment,N)
+    [xSynapses{i},ei{i}] = render_segment(xSegment,N);
     drawnow;
 end
 N = gridSize(max(xSoma(:,end)));
-render_segment(xSoma,N);
+[xSynapses{end+1},ei{end+1}] = render_segment(xSoma,N);
+xSynapses = cat(1,xSynapses{:});
+ei = cat(1,ei{:});
+
+set(gca,'CLim',[-1,1])
+colormap([1,0,0;0,0,0;0,0,1]);
+idcs = randsample(size(xSynapses,1),1e3);
+S = scatter3(xSynapses(idcs,1),xSynapses(idcs,2),xSynapses(idcs,3),0.5,ei(idcs)*2-1,'filled');
+
 
 return;
+% To get the section -> segment map, go to python and do
+% for i in range(cell.totnsegs):
+%    secNames.append(cell.get_idx_name(i)[1])
+% Then average over each segment to get the section voltages
+load('E:\Research_Projects\004_Propofol\data\simulations\raw\dendrite_voltages\LFPy\voltage_data.mat')
+V = [vDend,vSoma];
+V2 = resample(V,1e3,16e3);
+t = (1:size(V2,1));
+
 ch = flipud(get(gca,'Children'));
 for i = 1:length(ch)
-    alpha{i} = ch(i).CData;
+    alpha{i} = 1+0*ch(i).CData;
 end
-F = (V2 - -65)/(-55--65);
-F = min(max(F,0),1);
+% F = (V2 - -65)/(-55--65);
+% F = min(max(F,0),1);
+
+set(gca,'CLim',[-70,-50]);
+
+CM = jet(1001);
+colormap(flipud([CM(502:end,:);CM(1:500,:)]).*(1-exp(-linspace(-5,5,1e3).^2)'));
 
 v = VideoWriter('newfile.avi','Motion JPEG AVI');
 v.Quality = 95;
 open(v)
 for i = 800:1000
     for j = 1:length(ch)
-        ch(j).CData = alpha{j}*F(i,j);
+        ch(j).CData = max(alpha{j}*V2(i,j),-62);
     end
     title(sprintf('%.1f ms',t(i)),'color','w');
     drawnow;
@@ -90,8 +119,8 @@ for i = 800:1000
 end
 close(v);
 
-
-function render_segment(xSegment,N)
+end
+function [xSynapses,ei] = render_segment(xSegment,N)
     Xall = [];
     Yall = [];
     Zall = [];
@@ -123,5 +152,49 @@ function render_segment(xSegment,N)
 
     K = exp(-Yall.^2/80^2);
     surf(Xall,Yall,Zall,K,'LineStyle','none','FaceLighting','gouraud');
+
+    xSynapses= [];
+    ei= [];
+    return
+    d = cumsum([0;vecnorm(diff([Xall(:,1),Yall(:,1),Zall(:,1)]),2,2)]);
+    % Xall
+
+    nE = poissrnd(d(end));
+    idcs = rand(nE,1);
+    xE = interp1(d/max(d),Xall,idcs);
+    yE = interp1(d/max(d),Yall,idcs);
+    zE = interp1(d/max(d),Zall,idcs);
+    idcs = 2*pi*rand(nE,1);
+    xE2 = nan(length(idcs),1);
+    yE2 = nan(length(idcs),1);
+    zE2 = nan(length(idcs),1);
+    for j = 1:length(idcs)
+        xE2(j) = interp1(linspace(0,2*pi,N+1),xE(j,:),idcs(j));
+        yE2(j) = interp1(linspace(0,2*pi,N+1),yE(j,:),idcs(j));
+        zE2(j) = interp1(linspace(0,2*pi,N+1),zE(j,:),idcs(j));
+    end
+
+
+    nI = poissrnd(0.15*d(end));
+    idcs = rand(nI,1);
+    xI = interp1(d/max(d),Xall,idcs);
+    yI = interp1(d/max(d),Yall,idcs);
+    zI = interp1(d/max(d),Zall,idcs);
+    idcs = 2*pi*rand(nI,1);
+    xI2 = nan(length(idcs),1);
+    yI2 = nan(length(idcs),1);
+    zI2 = nan(length(idcs),1);
+    for j = 1:length(idcs)
+        xI2(j) = interp1(linspace(0,2*pi,N+1),xI(j,:),idcs(j));
+        yI2(j) = interp1(linspace(0,2*pi,N+1),yI(j,:),idcs(j));
+        zI2(j) = interp1(linspace(0,2*pi,N+1),zI(j,:),idcs(j));
+    end
+
+    xSynapses = [xE2(:),yE2(:),zE2(:); ...
+                xI2(:),yI2(:),zI2(:)];
+    ei = [zeros(nE,1);ones(nI,1)];
+
+    % plot3(Xall(iI),Yall(iI),Zall(iI),'.b','MarkerSize',5);
+
     % surf(Xall,Yall,Zall,'LineStyle','none');
 end

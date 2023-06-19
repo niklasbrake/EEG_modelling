@@ -8,7 +8,7 @@ mType2 = mType2{1};
 fclose(fid);
 for i = 1:length(mType2)
     [~,mType,~] = fileparts(mType2{i});
-    load(fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','segment_areas.mat'));
+    load(fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','morphology_segmentations.mat'));
     mData{i} = nrnSegs.(mType);
     mData{i}.x = mData{i}.x+(i-1)*500;
     mData{i}.pos = [mean(mData{i}.x,2),mean(mData{i}.y,2),mean(mData{i}.z,2)];

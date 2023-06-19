@@ -3,17 +3,22 @@ F = dir(folder); F = F(3:end);
 
 
 layers = [0,-300,-300,-750,-1000,-1335];
-x0(1,:) = [1150,layers(2)-20];
-x0(2,:) = [-100,layers(2)-150];
 x0(3,:) = [760,layers(4)];
-x0(4,:) = [-40,layers(4)];
-x0(5,:) = [1075,layers(4)];
-x0(6,:) = [220,layers(5)];
 x0(7,:) = [-300,layers(5)];
-x0(8,:) = [1250,layers(5)];
-x0(9,:) = [950,layers(6)-50];
+x0(1,:) = [1150,layers(2)-20];
+x0(6,:) = [220,layers(5)];
 x0(10,:) = [550,layers(6)+50];
+x0(8,:) = [1250,layers(5)];
 x0(11,:) = [-130,layers(6)];
+x0(9,:) = [950,layers(6)-50];
+x0(2,:) = [-100,layers(2)-150];
+x0(5,:) = [1075,layers(4)];
+x0(4,:) = [-40,layers(4)];
+
+J = [1,6,2,9,3,8,10,5,7,4,11];
+for i = 1:11
+    x0(i,1) = (J(i)-1)*300;
+end
 
 x_min = Inf;
 x_max = -Inf;
@@ -22,11 +27,11 @@ y_max = -Inf;
 
 fig = figureNB(8,7);
 ax = axes('units','centimeters');
-L = 5; H = 5;
+L = 6; H = 2.7;
 ax.Position = [fig.Position(3)/2-L/2,fig.Position(4)/2-H/2,L,H];
 LY = [0; -78; -500; -767; -975; -1250]*1.2;
 for i = 1:length(LY)
-    line([-1e3,2e3],[1,1]*LY(i),'color',[0.75,0.75,0.75]);
+    line([-1e3,4e3],[1,1]*LY(i),'color',[0.75,0.75,0.75]);
 end
 
 for k = 1:size(x0,1)
@@ -42,13 +47,14 @@ for k = 1:size(x0,1)
         z = morphData.z(i,:);
         L = vecnorm(diff([x;y;z]'));
         r = morphData.area(i)/2*pi/L;
-        line(x+x0(k,1),z+x0(k,2),'color',clr,'LineWidth',2./(1+7*exp(-(r-1)/2)));
+        line(x+x0(k,1),z+x0(k,2),'color',clr,'LineWidth',1./(1+7*exp(-(r-1)/2)));
         x_min = min(x_min,min(x+x0(k,1)));
         x_max = max(x_max,max(x+x0(k,1)));
         y_min = min(y_min,min(z+x0(k,2)));
         y_max = max(y_max,max(z+x0(k,2)));
     end
     set(gca,'DataAspectRatio',[1,1,1])
+    drawnow;
 end
 xlim([x_min,x_max]);
 ylim([y_min,y_max]);
