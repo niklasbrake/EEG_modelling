@@ -1,10 +1,12 @@
-folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\dendrite_voltages';
+folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test\active';
 % Initialize network
 network = network_simulation_beluga(folder);
+network.parameters.activeSoma = true;
 
 % Initialize post network
 nPostNeurons = 1;
-network = network.initialize_postsynaptic_network(nPostNeurons,1);
+mTypes = 1;
+network = network.initialize_postsynaptic_network(nPostNeurons,mTypes);
 
 % Presyanptic network parameters
 nPreNeurons = 30e3;

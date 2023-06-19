@@ -78,17 +78,22 @@ def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX=100):
 
         # Simulate
         cdm = LFPy.CurrentDipoleMoment(cell=cell)
-        cell.simulate(probes=[cdm],rec_somav=True,rec_vmem=False)
+        cell.simulate(probes=[cdm],rec_somav=True,rec_vmem=True)
 
         t = cell.tvec.reshape([-1,1])
         v = cell.somav.reshape([-1,1])
         data[5*k:5*(k+1),:] = np.concatenate((t,cdm.data.T,v),axis=1).T
+        # multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         cell.strip_hoc_objects()
+
 
     mType = str.split(connection_data['mFile'],'/')[-1][:-4]
     saveFile = savePath+'/'+ mType
     np.save(saveFile, data)
 
+    # from scipy.io import savemat
+    # fm = saveFile + '_multi_dipoles.mat'
+    # savemat(fm, {'dipoles':multi_dipoles,'x':dipole_locs,'time':t})
 
 if __name__ == "__main__":
     pars = sys.argv
