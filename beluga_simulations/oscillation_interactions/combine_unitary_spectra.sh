@@ -2,6 +2,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --account=def-akhadra
 #SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
 #SBATCH --mail-user=niklas.brake@mail.mcgill.ca
 #SBATCH --mail-type=FAIL,END
 

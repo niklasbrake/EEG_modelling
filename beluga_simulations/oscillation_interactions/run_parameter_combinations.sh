@@ -4,6 +4,7 @@
 #SBATCH --mem=4G
 #SBATCH --mail-user=niklas.brake@mail.mcgill.ca
 #SBATCH --mail-type=FAIL,END
+#SBATCH --output=simulation.log
 
 module load python/3.8.10
 module load mpi4py
@@ -18,5 +19,5 @@ pip install --no-index --upgrade pip --quiet
 pip install --no-index LFPy --quiet
 pip install --no-index umap-learn
 
-matlab -nodisplay -r "run_parameter_combinations"
+matlab -nodisplay -r "run_parameter_combinations(${SLURM_ARRAY_TASK_ID})"
 
