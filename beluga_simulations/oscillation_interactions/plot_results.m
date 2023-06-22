@@ -26,26 +26,28 @@ P_crit = P_crit(:,[4,1,2,3]);
 
 
 % load('E:\Research_Projects\004_Propofol\data\simulations\analyzed\oscillation_interactions.mat');
-load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\peak_trend_sensitivity.mat')
+load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\trend_peak_interaction.mat')
 f = 0.1:0.1:500;
 
 rhythms = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\rhythm_char.mat');
+rhythms = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\rhythm_spectra.mat');
+rhythms.psd = rhythms.psd([1,5,3,4,2]);
 
 
-
-P3 = zeros(length(f),4,5);
-P3(:,:,1) = mean(P2(:,:,1:4),2);
+P3 = zeros(length(f),5,5);
+P3(:,:,1) = mean(P2(:,:,1:5),2);
 % P3(:,:,2) = interp1(f2,P_crit,f,'linear','extrap');
-P3(:,:,2) = mean(P2(:,:,17:20),2);
-P3(:,:,3) = mean(P2(:,:,9:12),2);
-P3(:,:,4) = mean(P2(:,:,13:16),2);
-P3(:,:,5) = mean(P2(:,:,5:8),2);
+P3(:,:,2) = mean(P2(:,:,21:25),2);
+P3(:,:,3) = mean(P2(:,:,11:15),2);
+P3(:,:,4) = mean(P2(:,:,16:20),2);
+P3(:,:,5) = mean(P2(:,:,6:10),2);
+
 
 
 figureNB(15,12);
 for i = 1:5
-    for j = 1:4
-        subplot(5,5,5*(i-1)+j+1)
+    for j = 1:5
+        subplot(5,6,6*(i-1)+j+1)
         if(j==1)
             plot(f,P3(:,1,1),'color',[0.6,0.6,0.6],'LineWidth',1);
             hold on;
@@ -86,11 +88,13 @@ for i = 1:5
 end
 % set(gcf,'color','none')
 
+
 for i = 1:5
-    subplot(5,5,5*(i-1)+1)
-    plot(rhythms.f,mean(rhythms.psd{1},2),'color',[0.6,0.6,0.6],'LineWidth',0.5);
+    subplot(5,6,6*(i-1)+1)
+    cla
+    % plot(rhythms.f,mean(rhythms.psd{1},2),'color',[0.6,0.6,0.6],'LineWidth',0.5);
     hold on;
-    plot(rhythms.f,mean(rhythms.psd{i},2),'color','k','LineWidth',0.5);
+    plot(rhythms.f,mean(rhythms.psd{i},2),'color','k','LineWidth',1);
     gcaformat;
     set(gca,'color','none');
     set(gca,'xscale','log');
@@ -110,11 +114,11 @@ for i = 1:5
 end
 
 
-figureNB(15,12);
-for i = 1:5
-    subplot(5,5,5*(i-1)+1)
-    plot(rhythms.t,rhythms.eeg{i},'color','k','LineWidth',0.5);
-    xlim([1.8e4,2.3e4])
-    ylim([0.5,1.5]);
-    axis off;
-end
+% figureNB(15,12);
+% for i = 1:5
+%     subplot(5,5,5*(i-1)+1)
+%     plot(rhythms.t,rhythms.eeg{i},'color','k','LineWidth',0.5);
+%     xlim([1.8e4,2.3e4])
+%     ylim([0.5,1.5]);
+%     axis off;
+% end
