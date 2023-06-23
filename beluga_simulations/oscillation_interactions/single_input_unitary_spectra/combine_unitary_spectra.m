@@ -1,11 +1,12 @@
 function combine_unitary_spectra
 
 addpath('/lustre04/scratch/nbrake/code/simulation_code');
-folder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction';
+folder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction2';
 
 count = 1;
 rhythm = [];
 combo = [];
+
 for i = 1:5
     for j = 1:5
         saveFolder = fullfile(folder,['rhythm' int2str(i-1)],['combo' int2str(j)]);

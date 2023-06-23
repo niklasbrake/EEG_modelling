@@ -346,3 +346,46 @@ axes('Position',[0,0,1,1]);
     % text(4900,200-10,sprintf('\\rho=%.2f',c3),'FontSize',7,'HorizontalAlignment','right')
     axis off;
     drawnow;
+
+
+
+
+load('E:\Research_Projects\004_Propofol\data\simulations\raw\synthetic_spikes\synthetic_spikes_analyzed.mat')
+R = repmat(1:6,1,11);
+for i = 1:length(R)
+    C(i,1) = corr(dipoles(:,1,1,i),dipoles(:,1,2,i));
+    C(i,2) = corr(dipoles(:,2,1,i),dipoles(:,2,2,i));
+    C(i,3) = corr(dipoles(:,3,1,i),dipoles(:,3,2,i));
+end
+
+
+figureNB;
+plot(R,nanmean(C,2),'.k','MarkerSize',20)
+hold on;
+plot(1:6,splitapply(@nanmean,nanmean(C,2)',R),'-k');
+
+cr = reshape(nanmean(C,2),[6,11])';
+
+rRange = 10.^linspace(-4,-1,6);
+
+m0 = nanmean(cr);
+s = stderror(cr);
+figureNB;
+    plot(rRange,m0,'.-k','LineWidth',1,'MarkerSize',10)
+    hold on;
+    line([rRange;rRange],[m0-1.96*s;m0+1.96*s],'color','k','LineWidth',1)
+    set(gca,'xscale','log');
+    xlim([1e-4,0.0252])
+    ylabel('Dipole correlation')
+    xlabel('Synapse correlation (R_{max})')
+
+figureNB(5.25,1)
+X = eeg(1.1e5:1.4e5,:);
+axes('Position',[0,0,1,1])
+    plot(X(:,1),'color','r')
+    hold on;
+    plot(X(:,2),'color','k')
+    line([38e3-250*16,38e3],[-0.5,-0.5]*1e-6,'color','k','LineWidth',1)
+    line([38e3-250*16,38e3-250*16],[-0.25,0.75]*1e-6,'color','k','LineWidth',1)
+    xlim([1,40e3]);
+    axis off;

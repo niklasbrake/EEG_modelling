@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=01:00:00
+#SBATCH --time=12:00:00
 #SBATCH --account=def-akhadra
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=40
@@ -12,4 +12,3 @@
 
 module load matlab/2020a
 srun matlab -nodisplay -r "synthetic_spikes"
-

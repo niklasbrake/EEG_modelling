@@ -1,6 +1,6 @@
 function aperiodic_sensitivity(arrayID)
 
-baseFolder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction';
+baseFolder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction2';
 funPath = '/lustre04/scratch/nbrake/code/simulation_code';
 % funPath = 'C:\Users\brake\Documents\GitHub\EEG_modelling\simulation_code';
 % baseFolder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test2';
@@ -33,7 +33,7 @@ runSimulation(folder,pars2,lamFun)
 
 end
 function pars = changeParameters(pars,comboID)
-    pars.eiFraction = 0.8;
+    % pars.eiFraction = 0.8;
     switch comboID
     case 1
         % Baseline parameters (no change)
@@ -45,8 +45,9 @@ function pars = changeParameters(pars,comboID)
         pars.biophys_pars.pas_mem_pars.erev_leak = -45;
     case 4
         % Change firing rate without changing EI
-        pars.eCellParams.firingRate = 2*pars.eCellParams.firingRate;
-        pars.iCellParams.firingRate = 2*pars.iCellParams.firingRate;
+        % pars.eCellParams.firingRate = 2*pars.eCellParams.firingRate;
+        % pars.iCellParams.firingRate = 2*pars.iCellParams.firingRate;
+        pars.eSynParams.weight = 14e-4;
     case 5
         % Change EI without changing firing rate
         pars.iSynParams.weight = 14e-4;
@@ -57,7 +58,7 @@ function runSimulation(folder,pars,lamFun)
     network = network_simulation_beluga(folder,pars);
 
     % Initialize post network
-    network = network.initialize_postsynaptic_network(50);
+    network = network.initialize_postsynaptic_network(100);
 
     % Presyanptic network parameters
     network.tmax = 10e3; % 2 seconds
@@ -90,6 +91,5 @@ function runSimulation(folder,pars,lamFun)
     network_simulation_beluga.save_presynaptic_network(ids,ts,ei,network.getsynapsecount,network.spikingFile)
 
     % Simulate dipoles
-    network.parameters.eiFraction = 0.8;
     network = network.simulate();
 end

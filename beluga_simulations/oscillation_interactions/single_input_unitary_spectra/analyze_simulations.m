@@ -1,6 +1,6 @@
 function analyze_simulations(i)
 addpath('/lustre04/scratch/nbrake/code/simulation_code');
-folder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction';
+folder = '/lustre04/scratch/nbrake/data/simulations/trend_peak_interaction2';
 
 [sa,X] = network_simulation_beluga.getHeadModel;
 
