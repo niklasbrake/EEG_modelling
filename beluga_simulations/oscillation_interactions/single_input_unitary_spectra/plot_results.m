@@ -1,5 +1,6 @@
 
 load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\trend_peak_interaction2.mat')
+% load('E:\Research_Projects\004_Propofol\data\simulations\raw\trend_peak_interaction\trend_peak_interaction')
 f = 0.1:0.1:500;
 
 rhythms = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\rhythm_char.mat');
@@ -33,7 +34,7 @@ for i = 1:5
         set(gca,'yscale','log')
         xlim([0.1,100])
         xticks([1,100]);
-        ylim([1e-17,1e-15]);
+        ylim([1e-17,1e-13]);
         % if(i==2)
         %     ylim([1e-17,1e-13]);
         % else
@@ -74,7 +75,7 @@ for i = 1:5
     set(gca,'xscale','log');
     set(gca,'yscale','log');
     xlim([0.1,100]);
-    ylim([1e-6,1e0]);
+    ylim([2e-6,1e0]);
 
     xticks([]);
     yticks([]);
@@ -98,3 +99,46 @@ end
 %     ylim([0.5,1.5]);
 %     axis off;
 % end
+
+X{5} = csvread('../rhythm1.csv');
+X{3} = csvread('../rhythm2.csv');
+X{4} = csvread('../rhythm3.csv');
+X{2} = csvread('../rhythm4.csv');
+X{1} = [X{2}(:,1),1+0.1*randn(size(X{2}(:,1)))];
+
+
+testFolder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test';
+network = network_simulation_beluga(testFolder);
+network.parameters.iCellParams.firingRate = 1;
+network.parameters.eCellParams.firingRate = 1;
+network.tmax = 10e3; % 2 seconds
+
+figureNB(5,11);
+N = 1e6;
+for i = 1:5
+    lamFun = @(t0) interp1(X{i}(:,1),max(1+2*(1-X{i}(:,2)),0),t0,'linear','extrap');
+    [~,ts,~] = network.sample_spike_rate(lamFun,N);
+    subplot(5,1,i)
+    h = 2;
+    y = histcounts(ts,'BinWidth',h);
+    plot(y/N*1e3/h,'color','k');
+    xlim([0,5e3/h]);
+    % plot(X{i}(:,1),X{i}(:,2),'color','k');
+    % xlim([0,5e3]);
+    ylim([0.2,1.9]);
+    axis off;
+end
+
+%{
+figureNB(5,11);
+for i = 1:5
+    lamFun = @(t0) interp1(X{i}(:,1),max(1+2*(1-X{i}(:,2)),0),t0,'linear','extrap');
+    [~,ts,~] = network.sample_spike_rate(lamFun,1e6);
+    subplot(5,1,i)
+    h = 10;
+    y = histcounts(ts,'BinWidth',h);
+    pspectrum(detrend(y/N*1e3/h),1e3/h);
+    set(gca,'xscale','log');
+    gcaformat;
+end
+%}

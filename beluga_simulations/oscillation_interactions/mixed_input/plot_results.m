@@ -13,37 +13,47 @@ subplot(1,3,1);
     plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,40]);
+    xlim([0.5,50]);
+    xticks([0.5,5,50]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14])
 subplot(1,3,2);
     plotwitherror(f,psd2,'CI','LineWidth',1,'color','r');
     hold on;
     plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,40]);
+    xlim([0.5,50]);
+    xticks([0.5,5,50]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14])
 subplot(1,3,3);
     plotwitherror(f,psd3,'CI','LineWidth',1,'color',[1,0,1]);
     hold on;
     plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,40]);
+    xlim([0.5,50]);
+    xticks([0.5,5,50]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14])
+
+gcaformat(gcf)
 
 
-uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\trend_peak_interaction2.mat')
+% uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\trend_peak_interaction2.mat')
+uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\trend_peak_interaction\trend_peak_interaction');
 
 psd00 = mean(uni.P2(:,:,1),2);
 psd11 = mean(uni.P2(:,:,6),2);
 psd22 = mean(uni.P2(:,:,21),2);
+% psd000 = psd0./psd0(1000,:).*psd00(1000,:);
 
 figureNB(3,6.5);
 subplot(3,1,1);
@@ -56,6 +66,7 @@ subplot(3,1,1);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14.5])
     xlabel('');
 subplot(3,1,2);
     plot(f,psd00,'color',[0.6,0.6,0.6],'LineWidth',1)
@@ -67,6 +78,7 @@ subplot(3,1,2);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14.5])
     xlabel('');
 subplot(3,1,3);
     plot(f,psd00,'color',[0.6,0.6,0.6],'LineWidth',1)
@@ -78,3 +90,4 @@ subplot(3,1,3);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
+    ylim(10.^[-16.5,-14.5])
