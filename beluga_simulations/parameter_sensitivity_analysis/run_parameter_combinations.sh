@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=04:30:00
+#SBATCH --time=10:00:00
 #SBATCH --account=def-akhadra
 #SBATCH --mem=4G
 #SBATCH --mail-user=niklas.brake@mail.mcgill.ca

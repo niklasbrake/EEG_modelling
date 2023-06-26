@@ -53,9 +53,10 @@ gcaformat(gcf)
 
 figureNB(5.3,3);
 subplot(1,2,1);
-    idcs = find(pars(6,:)>1e-3);
+    idcs = find(pars(8,:)>1e-3);
     beta = oof_1_40(idcs,2);
     EI = pars(2,idcs)./pars(1,idcs);
+    % EI = pars(6,idcs)./pars(5,idcs);
     % idcs2 = find(and(EI>0.1,EI<50));
     % EI = EI(idcs2); beta = beta(idcs2);
     h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
@@ -74,10 +75,12 @@ subplot(1,2,1);
     ylim([-0.5,1.5])
     txt1 = text(0.1,1,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r');
     title('g_L high','FontSize',7,'Fontweight','normal')
+    gcaformat;
 subplot(1,2,2);
-    idcs = find(pars(6,:)<1e-4);
+    idcs = find(pars(8,:)<1e-4);
     beta = oof_1_40(idcs,2);
     EI = pars(2,idcs)./pars(1,idcs);
+    % EI = pars(6,idcs)./pars(5,idcs);
     % idcs2 = find(and(EI>0.1,EI<50));
     % EI = EI(idcs2); beta = beta(idcs2);
     h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
@@ -95,4 +98,4 @@ subplot(1,2,2);
     ylim([-0.5,1.5])
     txt2 = text(0.1,1,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r');
     title('g_L low','FontSize',7,'Fontweight','normal')
-gcaformat(gcf)
+    gcaformat;

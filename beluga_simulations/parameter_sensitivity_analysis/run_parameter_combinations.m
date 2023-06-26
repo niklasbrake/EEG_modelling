@@ -1,7 +1,7 @@
 function aperiodic_sensitivity(iChunk)
 
 % baseFolder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\aperiodic_interactions';
-baseFolder = '/lustre04/scratch/nbrake/data/simulations/parameter_sensitivity_analysis';
+baseFolder = '/lustre04/scratch/nbrake/data/simulations/parameter_sensitivity_analysis_2';
 addpath('/lustre04/scratch/nbrake/code/simulation_code');
 
 load(fullfile(baseFolder,'parameters.mat'));
@@ -11,11 +11,11 @@ str = char(fread(fid,inf)');
 fclose(fid);
 pars = jsondecode(str);
 
-for i = 1:6
+for i = 1:8
     strLHS{i} = ['pars.' sampled_parameters.Properties.VariableNames{i}];
 end
 
-chunk_size = 500;
+chunk_size = 1e3;
 N = size(sampled_parameters,1);
 m = floor(N/chunk_size);
 chunk = reshape(1:(m*chunk_size),chunk_size,m);
@@ -26,11 +26,11 @@ for k = 1:chunk_size
     k2 = chunk(k,iChunk);
 
     pars = jsondecode(str);
-    for i = 1:6
+    for i = 1:8
         strRHS = num2str(sampled_parameters{k2,i});
         eval([strLHS{i} '=' strRHS]);
     end
-    mType = sampled_parameters{k2,7};
+    mType = sampled_parameters{k2,9};
 
     folder = fullfile(baseFolder,'simulations',['sample' int2str(k2)]);
     dataFile = fullfile(folder,'simulation','simulation_data.mat');

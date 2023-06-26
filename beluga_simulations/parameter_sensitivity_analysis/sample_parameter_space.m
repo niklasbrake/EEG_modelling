@@ -4,6 +4,8 @@ function sampled_parameters = sample_parameter_space(N)
     lambda_I = @(p) icdf('logn',p,log(2.5),1);
     tauE = @(p) icdf('unif',p,1,3.5);
     tauI = @(p) icdf('unif',p,5,20);
+    gE = @(p) icdf('unif',p,0.2e-3,2e-3);
+    gI = @(p) icdf('unif',p,0.2e-3,2e-3);
     erev = @(p) icdf('unif',p,-75,-45);
     gleak = @(p) 10.^icdf('unif',p,-5,log10(0.005));
 
@@ -15,11 +17,11 @@ function sampled_parameters = sample_parameter_space(N)
     mType = @(p) interp1(mTypeP,1:11,p,'next','extrap');
 
     samplePars = @(P) [lambda_E(P(:,1)), lambda_I(P(:,2)), tauE(P(:,3)), ...
-                        tauI(P(:,4)), erev(P(:,5)), gleak(P(:,6)), mType(P(:,7))];
+                        tauI(P(:,4)), gE(P(:,5)), gI(P(:,6)), erev(P(:,7)), gleak(P(:,8)), mType(P(:,9))];
 
-    LH = lhsdesign(N,7);
+    LH = lhsdesign(N,9);
     PARS = samplePars(LH);
 
     sampled_parameters = array2table(PARS);
-    sampled_parameters.Properties.VariableNames = {'eCellParams.firingRate','iCellParams.firingRate','eSynParams.tau2','iSynParams.tau2','biophys_pars.pas_mem_pars.erev_leak','biophys_pars.pas_mem_pars.g_leak','mType'};
+    sampled_parameters.Properties.VariableNames = {'eCellParams.firingRate','iCellParams.firingRate','eSynParams.tau2','iSynParams.tau2','eSynParams.weight','iSynParams.weight','biophys_pars.pas_mem_pars.erev_leak','biophys_pars.pas_mem_pars.g_leak','mType'};
 end
