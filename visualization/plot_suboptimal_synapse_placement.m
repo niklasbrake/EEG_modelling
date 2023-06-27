@@ -1,3 +1,5 @@
+
+t = 1:11
 load('C:\Users\brake\Documents\temp\correlations_0.98_subopt.mat')
 m = sort([0.99,0.98,0.95,0.86,0.63,0]);
 clrs = clrsPT.sequential(length(m)+4);

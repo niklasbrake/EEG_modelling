@@ -8,12 +8,13 @@ m = cellfun(@(x)str2num(x(3:end-4)),{F(:).name});
 fr = cellfun(@(x)length(x),data)/(30000^2)*100;
 fr = fr(I);
 
-subplot(1,3,2);
-    plot(1./(1-m(:)),fr(:),'.-k','MarkerSize',15,'LineWidth',1)
-    ylabel('Correlated synapse pairs (STTC>0.25)')
+figureNB(2.5,3);
+    plot(1./(1-m(:)),fr(:),'.-k','MarkerSize',10,'LineWidth',1)
+    ylabel('Correlated synapses pairs')
     xlabel('1/(1-m)')
     set(gca,'xscale','log')
     ylim([0,1])
-    yticks([0,0.5,1])
-    yticklabels({'0%','0.1%','1%'})
+    yticks([0,0.1,1])
+    yticklabels({'0%','0.1%','1%'});
+    set(gca,'yscale','log')
     gcaformat

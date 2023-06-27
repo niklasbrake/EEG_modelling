@@ -331,6 +331,8 @@ classdef network_simulation_beluga
 
             % Convert NPY files to mat files
             pySimulate(obj.savePath,fullfile(network_simulation_beluga.functionFolder,'npy2mat.py'));
+
+            gitTracker(obj.outputPath,'Ran simulation.')
         end
 
         function obj = compute_presynaptic_correlations(obj,spikingFile)
