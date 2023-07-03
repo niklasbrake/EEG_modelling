@@ -1,7 +1,7 @@
-load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E_connections.mat')
+load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\matlab_morph_data\L23E_connections.mat')
 connections = connections+1;
-load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E.mat')
-X = csvread('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\L23E.csv');
+load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\matlab_morph_data\L23E.mat')
+X = csvread('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column_Hagen\matlab_morph_data\L23E.csv');
 for i=  1:size(X,1)
     segs{i} = X(i,X(i,:)~=0);
 end

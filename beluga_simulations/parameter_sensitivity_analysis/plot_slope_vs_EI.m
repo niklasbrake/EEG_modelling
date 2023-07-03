@@ -1,55 +1,25 @@
 % load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis\analyzed_results_all.mat')
 % load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis\fitted_spectra.mat')
+load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\fitted_spectra.mat')
 
-% tauI when gL is high
-% idcs = find(pars(6,:)>1e-3);
-idcs = 1:length(pars);
-psd0 = psd(:,idcs);
-idcs2 = interp1(linspace(0,1,5),1:5,P(4,idcs),'nearest','extrap');
-p_gL_high = splitapply(@(x) mean(x,2),psd0,idcs2);
-
-% tauI when gL is low
-% idcs = find(pars(6,:)<1e-4);
-idcs = 1:length(pars);
-psd0 = psd(:,idcs);
-idcs2 = interp1(linspace(0,1,5),1:5,P(5,idcs),'nearest','extrap');
-p_gL_low = splitapply(@(x) mean(x,2),psd0,idcs2);
-
-
-figureNB(5.3,3);
-clrs = clrsPT.sequential(10); clrs = clrs(5:end,:);
-ax(1) = axes('Position',[0.2,0.26,0.32,0.6]);
-ax(2) = axes('Position',[0.62,0.26,0.32,0.6]);
-for i = 1:5
-    axes(ax(1));
-        plot(f,p_gL_high(:,i),'color',clrs(i,:),'LineWidth',1);
-        hold on;
-    axes(ax(2));
-        plot(f,p_gL_low(:,i),'color',clrs(i,:),'LineWidth',1);
-        hold on;
-end
-
-axes(ax(1));
-    set(gca,'xscale','log');
-    set(gca,'yscale','log');
-    xlabel('Frequency (Hz)')
-    ylabel(['PSD (' char(956) 'V^2/Hz)'])
-    xlim([1,100]);
-    ylim([1e-17,2e-15])
-    txt = text(2,6.6e-17,'\lambda_I min','FontSize',6,'color',clrs(1,:));
-    txt = text(4,4.4e-16,'\lambda_I max','FontSize',6,'color',clrs(5,:));
-    title('g_L high','FontSize',7,'Fontweight','normal')
-axes(ax(2));
-    set(gca,'xscale','log');
-    set(gca,'yscale','log');
-    xlabel('Frequency (Hz)')
-    xlim([1,100]);
-    ylim([1e-17,2e-15])
-    yticks([]);
-    title('g_L low','FontSize',7,'Fontweight','normal')
-gcaformat(gcf)
-
-
+% Define distributions of parameters
+lambda_E = @(p) cdf('logn',p,log(0.5),1);
+lambda_I = @(p) cdf('logn',p,log(2.5),1);
+tauE = @(p) cdf('unif',p,1,3.5);
+tauI = @(p) cdf('unif',p,5,20);
+gE = @(p) cdf('unif',p,0.2e-3,2e-3);
+gI = @(p) cdf('unif',p,0.2e-3,2e-3);
+erev = @(p) cdf('unif',p,-75,-45);
+gleak = @(p) cdf('unif',log10(p),-5,log10(0.005));
+% Distribution of morphologies
+neuronTypes = {'L23E_oi24rpy1';'L23I_oi38lbc1';'L23I_oi38lbc1';'L4E_53rpy1';'L4E_j7_L4stellate';'L4E_j7_L4stellate';'L4I_oi26rbc1';'L4I_oi26rbc1';'L5E_oi15rpy4';'L5E_j4a';'L5I_oi15rbc1';'L5I_oi15rbc1';'L6E_51_2a_CNG';'L6E_oi15rpy4';'L6I_oi15rbc1';'L6I_oi15rbc1'};
+nrnAbundance = [26.8,3.2,4.3,9.5,9.5,9.5,5.6,1.5,4.9,1.3,0.6,0.8,14,4.6,1.9,1.9];
+mTypeCount = accumarray(findgroups(neuronTypes),nrnAbundance);
+mTypeP = cumsum(mTypeCount)/sum(mTypeCount);
+mType = @(p) interp1(mTypeP,1:11,p,'next','extrap');
+samplePars = @(P) [lambda_E(P(:,1)), lambda_I(P(:,2)), tauE(P(:,3)), ...
+tauI(P(:,4)), gE(P(:,5)), gI(P(:,6)), erev(P(:,7)), gleak(P(:,8)), mType(P(:,9))];
+P = samplePars(pars')';
 
 figureNB(5.3,3);
 subplot(1,2,1);
@@ -61,7 +31,7 @@ subplot(1,2,1);
     % EI = EI(idcs2); beta = beta(idcs2);
     h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
     hold on
-    FT = fitlm(log10(EI),beta);
+    FT = fitlm(log10(EI),beta)
     FT.Coefficients{2,4}
     corr(log10(EI)',beta)
     t = 10.^linspace(-5,5,1e3)';
@@ -71,7 +41,7 @@ subplot(1,2,1);
     ylabel('Slope (1-40 Hz)');
     xticks([0.1,1,10])
     xticklabels({'10:1','1:1','1:10'})
-    xlabel('E:I ratio')
+    xlabel('E:I ratio (\lambda_E:\lambda_I)')
     ylim([-0.5,1.5])
     txt1 = text(0.1,1,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r');
     title('g_L high','FontSize',7,'Fontweight','normal')
@@ -85,7 +55,7 @@ subplot(1,2,2);
     % EI = EI(idcs2); beta = beta(idcs2);
     h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
     hold on
-    FT = fitlm(log10(EI),beta);
+    FT = fitlm(log10(EI),beta)
     FT.Coefficients{2,4}
     
     t = 10.^linspace(-5,5,1e3)';
@@ -94,8 +64,9 @@ subplot(1,2,2);
     xlim([0.02,50])
     xticks([0.1,1,10])
     xticklabels({'10:1','1:1','1:10'})
-    xlabel('E:I ratio')
+    xlabel('E:I ratio (\lambda_E:\lambda_I)')
     ylim([-0.5,1.5])
     txt2 = text(0.1,1,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r');
     title('g_L low','FontSize',7,'Fontweight','normal')
     gcaformat;
+

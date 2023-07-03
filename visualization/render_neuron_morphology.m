@@ -30,10 +30,10 @@ view([0,0]);
 view([0,0]);
 hold on
 set(gca,'DataAspectRatio',[1,1,1]);
-gcaformat_dark
+% gcaformat_dark
 axis off;
 set(gca,'CLim',[0,1]);
-colormap('gray');
+colormap(flipud(gray(1e3)));
 
 xSynapses = cell(length(segs)+1,1);
 ei = cell(length(segs)+1,1);
@@ -77,13 +77,28 @@ N = gridSize(max(xSoma(:,end)));
 xSynapses = cat(1,xSynapses{:});
 ei = cat(1,ei{:});
 
+
+zl = get(gca,'zlim');
+xl = get(gca,'xlim');
+if(xl(1)>-100)
+    xl(1) = -100;
+end
+if(xl(2)<100)
+    xl(2) = 100;
+end
+zl(1) = zl(1)-20;
+xlim(xl);
+zlim(zl);
+line([-100,100],[0,0],[1,1]*zl(1),'LineWidth',2,'color','k');
+print(fig,fullfile('E:\Research_Projects\004_Propofol\presentations\_resources\neuron_morphologies',[mType '.svg']),'-dsvg')
+% close(fig);
+return;
 set(gca,'CLim',[-1,1])
 colormap([1,0,0;0,0,0;0,0,1]);
 idcs = randsample(size(xSynapses,1),1e3);
 S = scatter3(xSynapses(idcs,1),xSynapses(idcs,2),xSynapses(idcs,3),0.5,ei(idcs)*2-1,'filled');
 
 
-return;
 % To get the section -> segment map, go to python and do
 % for i in range(cell.totnsegs):
 %    secNames.append(cell.get_idx_name(i)[1])
@@ -150,7 +165,7 @@ function [xSynapses,ei] = render_segment(xSegment,N)
     % Yall = [Yall;Y2+x0(2)];
     % Zall = [Zall;Z2+x0(3)];
 
-    K = exp(-Yall.^2/80^2);
+    K = 1+0*exp(-Yall.^2/80^2);
     surf(Xall,Yall,Zall,K,'LineStyle','none','FaceLighting','gouraud');
 
     xSynapses= [];

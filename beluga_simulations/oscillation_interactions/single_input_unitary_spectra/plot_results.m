@@ -16,10 +16,18 @@ P3(:,:,4) = mean(P2(:,:,16:20),2);
 P3(:,:,5) = mean(P2(:,:,6:10),2);
 
 
+[full_model,synFun] = fittingmodel('lorenz');
+p(:,1) = [0.01,0.002,-0.35,-0.2];
+p(:,2) = [0.03,0.002,-0.16,-0.41];
+p(:,3) = [0.01,0.002,-0.07,-0.6];
+p(:,4) = [0.01,0.0025,-1,-0.02];
+p(:,5) = [0.011,0.0025,-0.25,-0.28];
+
+
 
 figureNB(18,11);
 for i = 1:5
-    for j = 2:5
+    for j = 1:5
         subplot(5,5,5*(i-1)+j)
         if(j==1)
             plot(f,P3(:,1,1),'color',[0.6,0.6,0.6],'LineWidth',1);
@@ -34,7 +42,7 @@ for i = 1:5
         set(gca,'yscale','log')
         xlim([0.1,100])
         xticks([1,100]);
-        ylim([1e-17,1e-13]);
+        ylim([1e-17,1e-15]);
         % if(i==2)
         %     ylim([1e-17,1e-13]);
         % else
@@ -61,8 +69,6 @@ for i = 1:5
         end
     end
 end
-% set(gcf,'color','none')
-
 
 for i = 1:5
     subplot(5,5,5*(i-1)+1)
@@ -107,27 +113,7 @@ X{2} = csvread('../rhythm4.csv');
 X{1} = [X{2}(:,1),1+0.1*randn(size(X{2}(:,1)))];
 
 
-testFolder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\test';
-network = network_simulation_beluga(testFolder);
-network.parameters.iCellParams.firingRate = 1;
-network.parameters.eCellParams.firingRate = 1;
-network.tmax = 10e3; % 2 seconds
 
-figureNB(5,11);
-N = 1e6;
-for i = 1:5
-    lamFun = @(t0) interp1(X{i}(:,1),max(1+2*(1-X{i}(:,2)),0),t0,'linear','extrap');
-    [~,ts,~] = network.sample_spike_rate(lamFun,N);
-    subplot(5,1,i)
-    h = 2;
-    y = histcounts(ts,'BinWidth',h);
-    plot(y/N*1e3/h,'color','k');
-    xlim([0,5e3/h]);
-    % plot(X{i}(:,1),X{i}(:,2),'color','k');
-    % xlim([0,5e3]);
-    ylim([0.2,1.9]);
-    axis off;
-end
 
 %{
 figureNB(5,11);

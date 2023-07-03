@@ -98,21 +98,21 @@ subplot(1,2,1);
     for i = 1:length(m)
         x = 1/(1-m(i));
         y = C_s0(i,:)';
-        % y = nanmean(C_s0(i,:));
-        % y_lo = icdf('normal',0.05,0,1)*stderror(C_s0(i,:)');
-        % y_hi = icdf('normal',0.95,0,1)*stderror(C_s0(i,:)');
-        plot(x,y,'.','color',[0.6,0.6,0.6],'MarkerSize',5,'LineWidth',1)
-        % line([x,x],[y+y_lo,y+y_hi],'color',[0.6,0.6,0.6],'linewidth',1);
+        y = nanmean(C_s0(i,:));
+        y_lo = icdf('normal',0.025,0,1)*stderror(C_s0(i,:)');
+        y_hi = icdf('normal',0.975,0,1)*stderror(C_s0(i,:)');
+        % plot(x,y,'.','color',[0.6,0.6,0.6],'MarkerSize',5,'LineWidth',1)
+        line([x,x],[y+y_lo,y+y_hi],'color',[0.6,0.6,0.6],'linewidth',1);
     end
     plot(1./(1-m),nanmean(C_s1,2),'color','k','LineWidth',1);
     for i = 1:length(m)
         x = 1/(1-m(i));
         y = C_s1(i,:)';
-        % y = nanmean(C_s1(i,:));
-        % y_lo = icdf('normal',0.05,0,1)*stderror(C_s1(i,:)');
-        % y_hi = icdf('normal',0.95,0,1)*stderror(C_s1(i,:)');
-        plot(x,y,'.','color',clrs(i,:),'MarkerSize',5,'LineWidth',1)
-        % line([x,x],[y+y_lo,y+y_hi],'color',clrs(i,:),'linewidth',1);
+        y = nanmean(C_s1(i,:));
+        y_lo = icdf('normal',0.025,0,1)*stderror(C_s1(i,:)');
+        y_hi = icdf('normal',0.975,0,1)*stderror(C_s1(i,:)');
+        % plot(x,y,'.','color',clrs(i,:),'MarkerSize',5,'LineWidth',1)
+        line([x,x],[y+y_lo,y+y_hi],'color',clrs(i,:),'linewidth',1);
     end
     set(gca,'xscale','log')
     xlim([1,100]);
