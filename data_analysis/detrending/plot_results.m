@@ -6,9 +6,19 @@ t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 psd = [];
 aligned = load(fullfile(dataFolder,'data_aligned_detrended.mat'));
 rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
-freq = rescaled.freq;
-%{
+% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save_rescaled.mat');
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\rescaled_20230701.mat')
+rescaled.synPars(1:4,:,:) = permute(pars(:,1:4,:),[2,1,3]);
 
+for i = 1:4
+    temp = squeeze(rescaled.synPars(i,:,:));
+    temp = smoothdata(temp,'movmedian',5);
+    rescaled.synPars(i,:,:) = temp;
+end
+
+freq = rescaled.freq;
+
+%{
 ptIdx = 1;
 preExample = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,ptIdx),2);
 postExample = 10.^nanmedian(rescaled.psd(:,rescaled.time>0,ptIdx),2);
@@ -18,6 +28,7 @@ postExample = 10.^nanmedian(rescaled.psd(:,rescaled.time>0,ptIdx),2);
 [synPost,synFun,full_model] = synDetrend(freq(freq<100),postExample(freq<100),3,'exp2');
 
 %}
+
 
 
 for i = 1:14
@@ -38,7 +49,8 @@ end
 
 
 
-deltaIdx = find(and(freq>=1,freq<4));
+
+deltaIdx = find(and(freq>1,freq<=4));
 alphaIdx = find(and(freq>=8,freq<15));
 betaIdx = find(and(freq>=15,freq<30));
 % betaIdx = find(and(freq>=30,freq<55));
@@ -96,14 +108,14 @@ axes('Position',[0.34,0.62,0.19,0.3]);
     axis xy
     xlim([-180,60]);
     xticks([-180:60:60]);
-    xticklabels(-3:1)
+    % xticklabels(-3:1)
     ylabel('Frequency (Hz)')
-    xlabel('Time rel. LOC (min)')
+    xlabel('LOC-aligned time (s)')
     set(gca,'CLim',[-5,10])
 ax1 = axes('Position',[0.82,0.62,0.15,0.3]);
-    h(1) = plotwitherror(rescaled.time,smoothdata(rescaled.alpha_pre,'movmedian',3),'SE','LineWidth',1,'color',clrs(1,:));
-    h(2) = plotwitherror(rescaled.time,smoothdata(rescaled.beta_pre,'movmedian',3),'SE','LineWidth',1,'color',clrs(2,:));
-    h(3) = plotwitherror(rescaled.time,smoothdata(rescaled.delta_pre,'movmedian',3),'SE','LineWidth',1,'color',clrs(3,:));
+    h(1) = plotwitherror(rescaled.time,smoothdata(rescaled.alpha_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(1,:));
+    h(2) = plotwitherror(rescaled.time,smoothdata(rescaled.beta_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(2,:));
+    h(3) = plotwitherror(rescaled.time,smoothdata(rescaled.delta_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(3,:));
     xlim([-1.25,0.25]);
     ylim([-2.5,15])
     % ylabel('Power (dB)');
@@ -147,7 +159,7 @@ axes('Position',[0.2,0.15,0.08,0.25]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
 axes('Position',[0.34,0.15,0.19,0.3]);
-    imagesc(aligned.time,freq,10*nanmean(aligned.syn,3));
+    imagesc(fulldata.time,fulldata.freq,nanmean(PSD-permute(P0,[1,3,2]),3))
     ylim([0.5,50])
     CB = colorbar('location','eastoutside');
     CB.Label.String = 'Power (dB)';
@@ -156,14 +168,14 @@ axes('Position',[0.34,0.15,0.19,0.3]);
     axis xy
     xlim([-180,60]);
     xticks([-180:60:60]);
-    xticklabels(-3:1)
+    % xticklabels(-3:1)
     ylabel('Frequency (Hz)')
-    xlabel('Time rel. LOC (min)')
+    xlabel('LOC-aligned time (s)')
     set(gca,'CLim',[-3,6])
 ax2 = axes('Position',[0.82,0.15,0.15,0.3]);
-    plotwitherror(rescaled.time,smoothdata(rescaled.alpha_syn,'movmedian',3),'SE','LineWidth',1,'color',clrs(1,:));
-    plotwitherror(rescaled.time,smoothdata(rescaled.beta_syn,'movmedian',3),'SE','LineWidth',1,'color',clrs(2,:));
-    plotwitherror(rescaled.time,smoothdata(rescaled.delta_syn,'movmedian',3),'SE','LineWidth',1,'color',clrs(3,:));
+    plotwitherror(rescaled.time,smoothdata(rescaled.alpha_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(1,:));
+    plotwitherror(rescaled.time,smoothdata(rescaled.beta_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(2,:));
+    plotwitherror(rescaled.time,smoothdata(rescaled.delta_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(3,:));
     xlim([-1.25,0.25]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
@@ -173,6 +185,9 @@ ax2 = axes('Position',[0.82,0.15,0.15,0.3]);
     xticklabels({'Infusion','LOC'})
     line([-1.5,0.5],[0,0],'color','k');
     ylim([-2.5,5])
+    text(-1.3,9.5/2,'\alpha (8-15 Hz)','FontSize',6,'Color',clrs(1,:));
+    text(-1.3,7/2,'\beta (15-30 Hz)','FontSize',6,'Color',clrs(2,:));
+    text(-1.3,12/2,'\delta (1-4 Hz)','FontSize',6,'Color',clrs(3,:));
 
 gcaformat(fig);
 

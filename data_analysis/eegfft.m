@@ -23,18 +23,13 @@ function [freq,time,psd] = eegfft(t,eeg,windowSize,overlap);
 	difT = ceil(Fs*(T-overlap));
 	rachTs = minT:difT:maxT;
 	hmw = hamming(L);
-	% K = zeros(L/2,length(rachTs));
-	K = [];
-	thet = K;
+	temp = zeros(length(iwindow),length(rachTs));
 	for i = 1:length(rachTs);
-		temp = eeg(rachTs(i)+iwindow);
-		% if(any(isnan(temp)))
-		% 	K(:,i) = nan;
-		% 	continue;
-		% end
-		[K(:,i),f] = pmtm(temp,2,[],Fs); % 3 tapers
-		% K(:,i) = 2*temp(2:L/2+1);
+		temp(:,i) = eeg(rachTs(i)+iwindow);
 	end
+	idcs = find(~any(isnan(temp)));
+	[K,f] = pmtm(temp(:,idcs),2,[],Fs); % 3 tapers
 	freq = f(2:end);
 	time = t(rachTs(:));
-	psd = K(2:end,:);
+	psd = zeros(length(freq),length(time));
+	psd(:,idcs) = K(2:end,:);

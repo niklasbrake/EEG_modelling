@@ -67,14 +67,23 @@ def biLorenz(fScaled, *params):
     ys = ys + np.log10(x2)
     return ys
 
+def uniLorenz(fScaled, *params):
+# def biExp(fScaled, *params):
+    tauI, tauE, ratio, mag = params[0]
+    ys = np.zeros_like(fScaled)
+    ys = ys + mag + np.log10(np.exp(ratio) + tauI*np.reciprocal(1+fScaled*tauI**2))
+    return ys
+
 def biExp(fScaled, *params):
     tau1,tau2,ratio,mag = params[0]
+    tau2 = 4e-3;
+    # tau2 = 0;
+    tau1 = 20e-3
     ys = np.zeros_like(fScaled)
     x2 = (tau1-tau2)**2 / ((1+tau1**2*fScaled)*(1+tau2**2*fScaled));
-    # x2 = 10**ratio * tau2*np.reciprocal(1+fScaled*tau2**2) * (1 + mag*tau1*np.reciprocal(1+fScaled*tau1**2))
     ys = ys + mag + np.log10(np.exp(ratio)+x2);
-    # ys = ys + np.log10(x2);
     return ys
+
 
 def syn_net(fScaled, *params):
     tau1,tau2,ratio,mag,mag2 = params[0]
@@ -157,8 +166,8 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
     # Aperiodic parameter bounds
     if(fitType=='exp2'):
         # lb_ap = [7e-3,0,-20,3]
-        lb_ap = [7e-3,0,-20,1]
-        ub_ap = [100e-3,10e-3,10,10]
+        lb_ap = [10e-3,3e-3,-20,3.5]
+        ub_ap = [50e-3,5e-3,-9,4.8]
         # ub_ap = [100e-3,30e-3,10,5]
         scale_ap = [5e-3,1e-3]
         full_model = full_model_exp2
@@ -198,7 +207,10 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
 
     startpoint = sp_ap
     if(len(sp_ap)==0):
-        sp_ap = [17e-3,1e-3,ratio0,4]
+        sp_ap = [17e-3,4e-3,-10.5,4.2]
+        sp_p = [0.5,2,1.5,8,0.3,1,22,0.1,4,4,0,1]
+        startpoint = sp_ap + sp_p[:3*nPeaks]
+    elif(len(sp_ap)==4):
         sp_p = [0.5,2,1.5,8,0.3,1,22,0.1,4,4,0,1]
         startpoint = sp_ap + sp_p[:3*nPeaks]
 
@@ -211,17 +223,17 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
 
     # Use inital guess to fit all parameters simulteanously
     if len(y_data.shape)==1:
-        results1 = sp.optimize.least_squares(full_objective,startpoint,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
+        results1 = sp.optimize.least_squares(objective,startpoint,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
         parsSave = results1.x
-        # print(full_objective(parsSave, full_model, [x_data, y_data]))
-        # print(full_objective(startpoint, full_model, [x_data, y_data]))
+        # print(objective(parsSave, full_model, [x_data, y_data]))
+        # print(objective(startpoint, full_model, [x_data, y_data]))
         # 1/0
         if(nPeaks>0 or fitType=='avalanches'):
             yDentrended = y_data-model_func(scaleFrequency(x_data),results1.x[:K])
             results2 = sp.optimize.least_squares(objective,results1.x[K:],bounds=(lb_p,ub_p),args = [emergent_power,[x_data, yDentrended]])
 
             pars0 = np.concatenate((results1.x[:K],results2.x),0)
-            results = sp.optimize.least_squares(full_objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
+            results = sp.optimize.least_squares(objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
             parsSave = results.x
     else:
         pars0 = fit_initial(x_data,y_data[:,0],[lb_ap,ub_ap,lb_p,ub_p,model_func,emergent_power,startpoint])
@@ -233,7 +245,7 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
                     pars0[j] = ub[j]
                 if(par<lb[j]):
                     pars0[j] = lb[j]
-            results = sp.optimize.least_squares(full_objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data[:,i]]])
+            results = sp.optimize.least_squares(objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data[:,i]]])
             parsSave[i,:] = results.x
     return parsSave
 
@@ -258,5 +270,4 @@ if __name__ == "__main__":
     saveName = filename[:-4] + '_params.csv'
     savedata(pars.tolist(),saveName)
     print(saveName,end='')
-
 
