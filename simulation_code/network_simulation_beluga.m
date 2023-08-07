@@ -103,6 +103,13 @@ classdef network_simulation_beluga
             obj.embeddingFunction = fullfile(network_simulation_beluga.functionFolder,'embed_data.py');
         end
 
+        function obj = resetPars(obj)
+            fid = fopen(fullfile(network_simulation_beluga.functionFolder,'mod_files','default_parameters.json'));
+            str = char(fread(fid,inf)');
+            fclose(fid);
+            obj.parameters = jsondecode(str);
+        end
+
         function N = getsynapsecount(obj)
             N = obj.synapseCount;
         end
@@ -282,7 +289,9 @@ classdef network_simulation_beluga
                     segmentList(idcs) = tempSegs;
                 end
             else
-                [synapseEmbedding,idPreSyn] = network_simulation_beluga.loadSynapseLocations(fullfile(obj.preNetwork,'UMAP_embedding.csv'),obj.synapseCount);
+                [ids,ts,ei] = obj.getprenetwork(obj.spikingFile);
+                N = length(ei);
+                [synapseEmbedding,idPreSyn] = network_simulation_beluga.loadSynapseLocations(fullfile(obj.preNetwork,'UMAP_embedding.csv'),N);
                 synapseEmbedding = network_simulation_beluga.perturbSynapsePositions(synapseEmbedding,1-coordination_index);
                 [theta,phi] = cart2sph(synapseEmbedding(:,1),synapseEmbedding(:,2),synapseEmbedding(:,3));
                 synapseEmbedding = [phi(:),theta(:)];
@@ -925,6 +934,8 @@ function samples = pdfSample(empiricalDist,n)
     samples = interp1(occuranceCDF,1:length(occuranceCDF),rand(n,1),'next','extrap');
 end
 function d = haversine_distance(p1,x)
+% x = [phi,theta]
+% phi \in [-pi/2,pi/2]
     d = hav(p1(1)-x(:,1))+(1-hav(x(:,1)-p1(1))-hav(p1(1)+x(:,1))).*hav(p1(2)-x(:,2));
 end
 function d = hav(x)
