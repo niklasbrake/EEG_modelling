@@ -1,3 +1,5 @@
+[full_model,synFun] = fittingmodel('lorenz');
+
 load('E:\Research_Projects\004_Propofol\data\simulations\raw\mixed_input\trend_peak_interaction_mixed.mat')
 f = 0.1:0.1:500;
 
@@ -114,7 +116,7 @@ subplot(2,4,1);
     plot(f,psd0,'color','k','LineWidth',1);
     hold on;
     plot(f,psd0(1)*10.^synFun(f,p0),'color',[0.6,0.6,0.6],'LineStyle','-','LineWidth',1);
-    plot(f,psd0(1)*10.^synFun(f,p0),'color','k','LineStyle','--','LineWidth',1);
+    % plot(f,psd0(1)*10.^synFun(f,p0),'color','k','LineStyle','--','LineWidth',1);
     set(gca,'yscale','log');
     ylim(10.^[-16.5,-14])
     yticks([]);
@@ -133,10 +135,12 @@ subplot(2,4,5);
     xticks([0.5,5,50]);
 
 subplot(2,4,2);
+    plot(f,psd0,'color','k','LineWidth',1);
+    hold on;
     plot(f,psd1,'color','b','LineWidth',1);
     hold on;
     plot(f,psd1(1)*10.^synFun(f,p1),'color',[0.6,0.6,0.6],'LineStyle','-','LineWidth',1);
-    plot(f,psd1(1)*10.^synFun(f,p1),'color','k','LineStyle','--','LineWidth',1);
+    % plot(f,psd1(1)*10.^synFun(f,p1),'color','k','LineStyle','--','LineWidth',1);
     set(gca,'yscale','log');
     ylim(10.^[-16.5,-14])
     yticks([]);
@@ -157,10 +161,12 @@ subplot(2,4,6);
     xticks([0.5,5,50]);
 
 subplot(2,4,3);
+    plot(f,psd0,'color','k','LineWidth',1);
+    hold on;
     plot(f,psd2,'color','r','LineWidth',1);
     hold on;
     plot(f,psd2(1)*10.^synFun(f,p2),'color',[0.6,0.6,0.6],'LineStyle','-','LineWidth',1);
-    plot(f,psd2(1)*10.^synFun(f,p2),'color','k','LineStyle','--','LineWidth',1);
+    % plot(f,psd2(1)*10.^synFun(f,p2),'color','k','LineStyle','--','LineWidth',1);
     set(gca,'yscale','log');
     ylim(10.^[-16.5,-14])
     yticks([]);
@@ -182,10 +188,12 @@ subplot(2,4,7);
 
 
 subplot(2,4,4);
+    plot(f,psd0,'color','k','LineWidth',1);
+    hold on;
     plot(f,psd3,'color','m','LineWidth',1);
     hold on;
     plot(f,psd3(1)*10.^synFun(f,p3),'color',[0.6,0.6,0.6],'LineStyle','-','LineWidth',1);
-    plot(f,psd3(1)*10.^synFun(f,p3),'color','k','LineStyle','--','LineWidth',1);
+    % plot(f,psd3(1)*10.^synFun(f,p3),'color','k','LineStyle','--','LineWidth',1);
     set(gca,'yscale','log');
     ylim(10.^[-16.5,-14])
     yticks([]);

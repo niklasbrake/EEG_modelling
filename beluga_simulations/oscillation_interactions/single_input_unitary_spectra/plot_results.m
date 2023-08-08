@@ -70,18 +70,26 @@ for i = 1:5
     end
 end
 
+figureNB(18*0.9,11);
+fs = 100; t = 0:1/fs:1000; y = 1+0.1*sin(2*pi*t*2);
+[psd,f] = pmtm(detrend(y,'constant'),2,[],fs);
+
 for i = 1:5
     subplot(5,5,5*(i-1)+1)
-    cla
-    % plot(rhythms.f,mean(rhythms.psd{1},2),'color',[0.6,0.6,0.6],'LineWidth',0.5);
-    hold on;
-    plot(rhythms.f,mean(rhythms.psd{i},2),'color','k','LineWidth',1);
+    if(i~=2)
+        plot(rhythms.f/5,mean(rhythms.psd{i},2),'color','k','LineWidth',1);
+    else
+        plot(rhythms.f,mean(rhythms.psd{i},2),'color','k','LineWidth',1);
+    end
+    if(i==5)
+        plot(f,psd,'color','k','LineWidth',1);
+    end
     gcaformat;
     set(gca,'color','none');
     set(gca,'xscale','log');
     set(gca,'yscale','log');
     xlim([0.1,100]);
-    ylim([2e-6,1e0]);
+    ylim([1e-8,1e0]);
 
     xticks([]);
     yticks([]);
@@ -114,8 +122,8 @@ X{1} = [X{2}(:,1),1+0.1*randn(size(X{2}(:,1)))];
 
 
 
-
-%{
+network = network_simulation_beluga('E:\Research_Projects\004_Propofol\data\simulations\raw\test');
+network.tmax = 10e3;
 figureNB(5,11);
 for i = 1:5
     lamFun = @(t0) interp1(X{i}(:,1),max(1+2*(1-X{i}(:,2)),0),t0,'linear','extrap');
@@ -127,4 +135,3 @@ for i = 1:5
     set(gca,'xscale','log');
     gcaformat;
 end
-%}
