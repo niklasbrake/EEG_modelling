@@ -1,31 +1,16 @@
-function [ids,ts,ei,P,trueL] = run_EInetwork(N,lTarget)
-tmax = 1e4;
-
 folder = '/lustre04/scratch/nbrake/data/simulations/EI_network';
 
-% N = 30e3;
-P = rand(N,2);
-P(:,1) = acos(1-2*P(:,1))-pi/2;
-P(:,2) = 2*P(:,2)*pi;
+N = 30e3;
+tmax = 10e3;
 
 % Set up connectivity matrix
 pars.g = 1;
-pars.p = 0.2*0.1;
+pars.p = 0.17;
 pars.alpha = 0.2;
 
 A = 5;
-% pars.w = lTarget*2/(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha);
-% lTarget = 0.99;
-% pars.w = lTarget*2/(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha);
-pars.w = 5*lTarget*2/(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha/A);
-
-lam = pars.w/2*(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha);
-% lam = pars.w/2*(N*pars.p*(1-pars.alpha)*(1-(1-A)*pars.alpha) - pars.g*N*pars.p*pars.alpha/A);
-
-sE = (pars.p/3-pars.p^2/4)*pars.w^2;
-sI = (pars.p/3-pars.p^2/4)*(pars.g*pars.w)^2;
-R = sqrt(N*(1-pars.alpha)*sE^2+pars.alpha*sI^2);
-lMax = max(lam,R);
+L = 0;
+pars.w = L*2/(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha/A);
 
 ei = zeros(N,1);
 ei(floor(N*(1-pars.alpha)):end) = 1;
@@ -36,21 +21,11 @@ k = round(normrnd(N*pars.p,sqrt(N*pars.p*(1-pars.p)),N,1));
 J = zeros(N,N);
 
 
-hav = @(x) (1-cos(x))/2;
-h_dist = @(p1,x) hav(p1(1)-x(:,1))+(1-hav(x(:,1)-p1(1))-hav(p1(1)+x(:,1))).*hav(p1(2)-x(:,2));
-
 waitbar(0);
 for i = 1:N
     waitbar(i/N);
-    p0 = P(i,:);
-    % d = max(exp(-sqrt(sum((p0-P).^2,2))/0.005),1e-9);
-    % d = max(exp(-sqrt(sum((p0-P).^2,2))/0.006),1e-9);
-    d = max(exp(-h_dist(p0,P)/8e-4),1e-9);
-    idcs = [1:i-1,i+1:N];
-    C = cumsum(d(idcs))/sum(d(idcs));
-    iTarget = interp1(C,idcs,rand(k(i),1),'next','extrap');
+    iTarget = randsample(N,k(i));
 
-    % iTarget = randsample(N,k(i));
     if(ei(i)) % Inhibitory
         J(iTarget,i) = -pars.g*pars.w*rand(k(i),1)/A^2;
     else % excitatory
@@ -66,9 +41,11 @@ J = sparse(J);
 % Set up simulations
 dt = 4;
 pars.pext_I = 0.002;
-pars.pext_I = 2.5*(1-lTarget)*dt*1e-3 + 0.06*lTarget*dt*1e-3;
+% pars.pext_I = 2.5*(1-L)*dt*1e-3 + 0.06*L*dt*1e-3;
+pars.pext_I = 2.5*(1-L)*dt*1e-3 + 0.01*L*dt*1e-3;
 pars.pext_E = 0.002;
-pars.pext_E = 0.5*(1-lTarget)*dt*1e-3 + 0.06*lTarget*dt*1e-3;
+% pars.pext_E = 0.5*(1-L)*dt*1e-3 + 0.06*L*dt*1e-3;
+pars.pext_E = 0.5*(1-L)*dt*1e-3 + 0.01*L*dt*1e-3;
 T = 0:dt:tmax;
 M = length(T);
 
@@ -114,21 +91,49 @@ end
 ids(count+1:end) = [];
 ts(count+1:end) = [];
 
-
+sum(ei(ids)==1)/10/sum(ei==1)
+sum(ei(ids)==0)/10/sum(ei==0)
 nanmean(trueL)
 
-% save(fullfile(folder,'EI_network.mat','ids','ts','ei','pars'))
 
-% lamI = sum(ei(ids)==1)/sum(ei==1)/tmax*1e3
-% lamE = sum(ei(ids)==0)/sum(ei==0)/tmax*1e3
-% ei = lamI/lamE
+folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\hybrid';
+% Initialize network
+network = network_simulation_beluga(folder);
 
-% if(lamI<20)
-    % [d,I] = sort(sqrt(sum((P-[0.5,0.5]).^2,2)));
-    [d,I] = sort(P(:,2));
-    [~,J] = sort(I);
-    ids = J(ids);
-    P = P(I,:);
-%     raster(J(ids),ts);
-% end
-% raster(ids,ts);
+% Initialize post network
+nPostNeurons = 1;
+mType = 4;
+network = network.initialize_postsynaptic_network(nPostNeurons,mType);
+
+network.tmax = 10e3; % 2 seconds
+
+network_simulation_beluga.save_presynaptic_network(ids,ts,ei,N,network.spikingFile)
+
+i0 = randi(N); % Choose random neuron for postsyanptic 
+i1 = find(J(i0,:)); % Get presynaptic connections
+
+X = csvread('E:\Research_Projects\004_Propofol\data\simulations\raw\hybrid\presynaptic_network\spikeTimes.csv',0,1);
+
+% extract and format presyanptic network to the chosen postsynaptic neuron
+ids = X(i1,:)*0+i1(:);
+ts = X(i1,:);
+ids = ids(:);
+ts = ts(:);
+[i,j,ts] = find(ts);
+ids = ids(i);
+[ids,j0] = findgroups(ids);
+EI = ei(j0);
+
+
+
+network.spikingFile = fullfile(network.preNetwork,'preSpikes.csv');
+network_simulation_beluga.save_presynaptic_network(ids,ts,EI,length(i1),network.spikingFile)
+
+network = network.setsynapsecount(length(EI));
+network.form_connections(0);
+
+network.simulate();
+
+network.savePath = fullfile(network.outputPath,'simulation_tau');
+network.parameters.iSynParams.tau2 = 20;
+network.simulate();
