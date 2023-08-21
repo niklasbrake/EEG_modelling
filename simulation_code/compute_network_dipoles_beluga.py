@@ -102,8 +102,12 @@ if __name__ == "__main__":
     spikingFile = pars[2]
     savePath = pars[3]
     T_MAX = int(pars[4])
+    if(len(pars)<6):
+        parFile = '_parameters.json'
+    else:
+        parFile = pars[5]
 
-    with open(os.path.join(savePath,'_parameters.json'), 'r') as f:
+    with open(os.path.join(savePath,parFile), 'r') as f:
         parameters = json.load(f)
 
     preEI,preSpikes = load_spike_times(spikingFile)

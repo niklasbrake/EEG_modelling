@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import sys
 
-def main(path):
+def main(path,filename,toDelete):
     npzFiles = glob.glob(path + "/*.npy")
     for i,f in enumerate(npzFiles):
         d = np.load(f)
@@ -24,12 +24,25 @@ def main(path):
     Qy = np.transpose(np.expand_dims(Qy,2),(1,2,0))
     Qz = np.transpose(np.expand_dims(Qz,2),(1,2,0))
     dipoles = np.concatenate((Qx,Qy,Qz),axis=1)
-    fm = path+'/simulation_data.mat'
+    fm = path+'/'+filename
     savemat(fm, {'dipoles':dipoles,'time':t.T,'V':Vm.T})
     print('Done (',path, ')')
+
+    if(toDelete):
+        import os
+        for f in npzFiles:
+            os.remove(f)
 
 if __name__ == "__main__":
     pars = sys.argv
     path = pars[1]
-    main(path)
+    if(len(pars)>2):
+        filename = pars[2]
+    else:
+        filename = 'simulation_data.mat'
+    if(len(pars)>3):
+        toDelete = (pars[3]=='True')
+    else:
+        toDelete = False
+    main(path,filename,toDelete)
 
