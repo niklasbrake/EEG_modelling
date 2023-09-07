@@ -49,51 +49,52 @@ subplot(1,3,3);
 gcaformat(gcf)
 
 
-% uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\trend_peak_interaction2.mat')
 uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\trend_peak_interaction\trend_peak_interaction');
 
 psd00 = mean(uni.P2(:,:,1),2);
 psd11 = mean(uni.P2(:,:,6),2);
 psd22 = mean(uni.P2(:,:,21),2);
+f = 0.1:0.1:500;
 % psd000 = psd0./psd0(1000,:).*psd00(1000,:);
 
-figureNB(3,6.5);
-subplot(3,1,1);
+figureNB(7.6,3);
+axes('Position',[0.05, 0.23, 0.27, 0.70])
     plot(f,psd00,'color',[0.6,0.6,0.6],'LineWidth',1)
     hold on;
     plot(f,psd11,'color','k','LineWidth',1)
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,100]);
+    xlim([0.5,100]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
     ylim(10.^[-16.5,-14.5])
-    xlabel('');
-subplot(3,1,2);
+    xticks([0.5,5,50]);
+axes('Position',[0.375, 0.23, 0.27, 0.70])
     plot(f,psd00,'color',[0.6,0.6,0.6],'LineWidth',1)
     hold on;
     plot(f,psd22,'color','k','LineWidth',1)
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,100]);
+    xlim([0.5,100]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
     ylim(10.^[-16.5,-14.5])
-    xlabel('');
-subplot(3,1,3);
+    xticks([0.5,5,50]);
+axes('Position',[0.70, 0.23, 0.27, 0.70])
     plot(f,psd00,'color',[0.6,0.6,0.6],'LineWidth',1)
     hold on;
     plot(f,psd0,'LineWidth',1,'color','k');
     set(gca,'xscale','log');
     set(gca,'yscale','log');
-    xlim([0.1,100]);
+    xlim([0.5,100]);
     xlabel('Frequency (Hz)');
     ylabel('log power');
     yticks([]);
     ylim(10.^[-16.5,-14.5])
-
+    xticks([0.5,5,50]);
+gcaformat(gcf)
 
 
 

@@ -36,7 +36,18 @@ case 3
     lamFun1 = @(t0) interp1(X1(:,1),max(1+5*(1-X1(:,2)),0),t0,'linear','extrap');
     lamFun2 = @(t0) interp1(X2(:,1),max(1+5*(1-X2(:,2)),0),t0,'linear','extrap');
     folder = fullfile(baseFolder,'high_both');
+case 4
+    % Oscillation only case
+    lamFun1 = @(t0) interp1(X1(:,1),max(1+1*(1-X1(:,2)),0),t0,'linear','extrap');
+    lamFun2 = @(t0) interp1(X2(:,1),max(1+1*(1-X1(:,2)),0),t0,'linear','extrap');
+    folder = fullfile(baseFolder,'oscillation_only');
+case 5
+    % Aperiodic only case
+    lamFun1 = @(t0) interp1(X1(:,1),max(1+1*(1-X2(:,2)),0),t0,'linear','extrap');
+    lamFun2 = @(t0) interp1(X2(:,1),max(1+1*(1-X2(:,2)),0),t0,'linear','extrap');
+    folder = fullfile(baseFolder,'aperiodic_only');
 end
+
 runSimulation(folder,pars,lamFun1,lamFun2);
 end
 function runSimulation(folder,pars,lamFun1,lamFun2)

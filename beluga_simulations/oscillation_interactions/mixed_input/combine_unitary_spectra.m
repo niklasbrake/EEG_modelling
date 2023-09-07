@@ -6,7 +6,7 @@ baseFolder = '/lustre04/scratch/nbrake/data/simulations/mixed_input';
 [sa,X] = network_simulation_beluga.getHeadModel;
 
 
-inputType = {'baseline', 'high_aperiodic', 'high_both', 'high_oscillation'};
+inputType = {'baseline', 'high_aperiodic', 'high_both', 'high_oscillation','oscillation_only','aperiodic_only'};
 
 rhythm = [];
 combo = [];
