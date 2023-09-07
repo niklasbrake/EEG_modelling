@@ -1,103 +1,104 @@
+dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 load(fullfile(dataFolder,'data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
+
+deltaIdx = find(and(freq>=0.5,freq<4));
+alphaIdx = find(and(freq>=8,freq<15));
+betaIdx = find(and(freq>=15,freq<30));
+aligned.alpha_syn = squeeze(nanmean(aligned.syn(alphaIdx,:,:)));
+aligned.beta_syn = squeeze(nanmean(aligned.syn(betaIdx,:,:)));
+aligned.delta_syn = squeeze(nanmean(aligned.syn(deltaIdx,:,:)));
+aligned.alpha_pre = squeeze(nanmean(aligned.pre(alphaIdx,:,:)));
+aligned.beta_pre = squeeze(nanmean(aligned.pre(betaIdx,:,:)));
+aligned.delta_pre = squeeze(nanmean(aligned.pre(deltaIdx,:,:)));
+
 for i = 1:14
-    t1 = -rescaled.time*t0(i);
-    aligned.alpha_pre(:,i) = interp1(t1,rescaled.alpha_pre(:,i),aligned.time,'linear');
-    aligned.beta_pre(:,i) = interp1(t1,rescaled.beta_pre(:,i),aligned.time,'linear');
-    aligned.delta_pre(:,i) = interp1(t1,rescaled.delta_pre(:,i),aligned.time,'linear');
+    % t1 = -rescaled.time*t0(i);
+    % aligned.alpha_pre(:,i) = interp1(t1,rescaled.alpha_pre(:,i),aligned.time,'linear');
+    % aligned.beta_pre(:,i) = interp1(t1,rescaled.beta_pre(:,i),aligned.time,'linear');
+    % aligned.delta_pre(:,i) = interp1(t1,rescaled.delta_pre(:,i),aligned.time,'linear');
 
-    aligned.alpha_syn(:,i) = interp1(t1,rescaled.alpha_syn(:,i),aligned.time,'linear');
-    aligned.beta_syn(:,i) = interp1(t1,rescaled.beta_syn(:,i),aligned.time,'linear');
-    aligned.delta_syn(:,i) = interp1(t1,rescaled.delta_syn(:,i),aligned.time,'linear');
+    % aligned.alpha_syn(:,i) = interp1(t1,rescaled.alpha_syn(:,i),aligned.time,'linear');
+    % aligned.beta_syn(:,i) = interp1(t1,rescaled.beta_syn(:,i),aligned.time,'linear');
+    % aligned.delta_syn(:,i) = interp1(t1,rescaled.delta_syn(:,i),aligned.time,'linear');
+
+    aligned.delta_syn(:,i) = aligned.delta_syn(:,i)-nanmean(aligned.delta_syn(aligned.time<=t0(i),i));
+    aligned.alpha_syn(:,i) = aligned.alpha_syn(:,i)-nanmean(aligned.alpha_syn(aligned.time<=t0(i),i));
+    aligned.beta_syn(:,i) = aligned.beta_syn(:,i)-nanmean(aligned.beta_syn(aligned.time<=t0(i),i));
+
+
+    aligned.delta_syn(:,i) = fillgaps(aligned.delta_syn(:,i),5e3);
+    aligned.alpha_syn(:,i) = fillgaps(aligned.alpha_syn(:,i),1024);
+    aligned.beta_syn(:,i) = fillgaps(aligned.beta_syn(:,i),512);
+
+    aligned.delta_pre(:,i) = fillgaps(aligned.delta_pre(:,i),5e3);
+    aligned.alpha_pre(:,i) = fillgaps(aligned.alpha_pre(:,i),1024);
+    aligned.beta_pre(:,i) = fillgaps(aligned.beta_pre(:,i),512);
 end
 
+% Not enough data points for computing baseline
+aligned.delta_syn(:,3) = nan*aligned.delta_syn(:,3);
 
-figureNB(9,4);
-ax1 = axes('Position',[0.08,0.22,0.4,0.7]);
-    h(1) = plotwitherror(aligned.time,smoothdata(aligned.alpha_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(1,:));
-    h(2) = plotwitherror(aligned.time,smoothdata(aligned.beta_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(2,:));
-    h(3) = plotwitherror(aligned.time,smoothdata(aligned.delta_pre,'movmedian',3),'CI','LineWidth',1,'color',clrs(3,:));
+blue = clrsPT.qualitative_CM.blue;
+clrs = clrsPT.lines(3);
+clrs(2:3,:) = flip(clrs(2:3,:));
+
+% figureNB(30,10);
+% for i = 1:14
+%     subplot(2,7,i);
+%     plot(aligned.time,aligned.delta_syn(:,i))
+%     line(get(gca,'xlim'),[0,0],'color','k')
+%     ylim([-10,10])
+% end
+
+
+aligned.alpha_pre = smoothdata(aligned.alpha_pre,'movmedian',40);
+aligned.beta_pre = smoothdata(aligned.beta_pre,'movmedian',40);
+aligned.delta_pre = smoothdata(aligned.delta_pre,'movmedian',40);
+aligned.alpha_syn = smoothdata(aligned.alpha_syn,'movmedian',40);
+aligned.beta_syn = smoothdata(aligned.beta_syn,'movmedian',40);
+aligned.delta_syn = smoothdata(aligned.delta_syn,'movmedian',40);
+
+figureNB(7,6);
+subplot(3,2,1);
+    plotwitherror(aligned.time,aligned.alpha_pre,'CI','LineWidth',1,'color',clrs(1,:));
     xlim([-240,60]);
-    ylim([-2.5,15])
+    ylim([-2.75,10])
+    text(-220,10,'\alpha (8-15 Hz)','FontSize',6,'color',clrs(1,:),'VerticalAlignment','top');
     ylabel('Power (dB)')
-    xlabel('Time rel. LOC (s)')
     line([-300,60],[0,0],'color','k');
-    text(-220,15,'\alpha (8-15 Hz)','FontSize',6,'Color',clrs(1,:));
-    text(-220,17,'\beta (15-30 Hz)','FontSize',6,'Color',clrs(2,:));
-    text(-220,19,'\delta (1-4 Hz)','FontSize',6,'Color',clrs(3,:));
-
-ax2 = axes('Position',[0.59,0.22,0.4,0.7]);
-    plotwitherror(aligned.time,smoothdata(aligned.alpha_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(1,:));
-    plotwitherror(aligned.time,smoothdata(aligned.beta_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(2,:));
-    plotwitherror(aligned.time,smoothdata(aligned.delta_syn,'movmedian',3),'CI','LineWidth',1,'color',clrs(3,:));
+subplot(3,2,3);
+    plotwitherror(aligned.time,aligned.beta_pre,'CI','LineWidth',1,'color',clrs(2,:));
     xlim([-240,60]);
-    ylabel('Detrended power (dB)')
-    xlabel('Time rel. LOC (s)')
+    ylim([-2.5,7])
+    text(-220,7,'\beta (15-30 Hz)','FontSize',6,'color',clrs(2,:),'VerticalAlignment','top');
+    ylabel('Power (dB)')
     line([-300,60],[0,0],'color','k');
-    ylim([-2.5,5])
-    text(-220,7.5,'\alpha (8-15 Hz)','FontSize',6,'Color',clrs(1,:));
-    text(-220,8.5,'\beta (15-30 Hz)','FontSize',6,'Color',clrs(2,:));
-    text(-220,9.5,'\delta (1-4 Hz)','FontSize',6,'Color',clrs(3,:));
-
-
-
-k = 4;
-A = aligned.alpha_pre;
-B = aligned.beta_pre;
-D = aligned.delta_pre;
-aligned.p = [];
-M = size(A,1);
-for i = 1:floor(M/k)
-    aligned.p(i,1) = signtest(nanmedian(A((i-1)*k+1:i*k,:)),0,'tail','right');
-    aligned.p(i,2) = signtest(nanmedian(B((i-1)*k+1:i*k,:)),0,'tail','right');
-    aligned.p(i,3) = signtest(nanmedian(D((i-1)*k+1:i*k,:)),0,'tail','right');
-end
-
-A = aligned.alpha_syn;
-B = aligned.beta_syn;
-D = aligned.delta_syn;
-aligned.p_syn = [];
-aligned.time2 = [];
-for i = 1:floor(M/k)
-    aligned.p_syn(i,1) = signtest(nanmedian(A((i-1)*k+1:i*k,:)),0,'tail','right');
-    aligned.p_syn(i,2) = signtest(nanmedian(B((i-1)*k+1:i*k,:)),0,'tail','right');
-    aligned.p_syn(i,3) = signtest(nanmedian(D((i-1)*k+1:i*k,:)),0,'tail','right');
-    aligned.time2(i) = aligned.time(k*(i-1)+1);
-end
-
-dt = aligned.time(2)-aligned.time(1);
-
-idx = [2,1,3];
-axes(ax1)
-    for j = 1:3
-        for i = 1:length(aligned.time2)
-            t1 =aligned.time2(i);
-            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,2,2]*(aligned.p(i,j)<0.05)+12+2*idx(j),clrs(j,:),'LineStyle','none');
-            hold on
-        end
-    end
+subplot(3,2,5);
+    plotwitherror(aligned.time,aligned.delta_pre,'CI','LineWidth',1,'color',clrs(3,:));
     xlim([-240,60]);
-    % ylim([-2.5,18])
-    ylim([-8,20])
-    gcaformat;
-    % line([0,0],[0,3],'color','k','LineWidth',1);
-    % text(0.43,18.2,'*')
-    % text(0.43,16.2,'*')
-    % text(0.43,14.2,'*')
-axes(ax2);
-    for j = 1:3
-        for i = 1:length(aligned.time2)
-            t1 =aligned.time2(i);
-            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,1,1]*(aligned.p_syn(i,j)<0.05)+6+idx(j),clrs(j,:),'LineStyle','none');
-            hold on
-        end
-    end
+    ylim([-3.5,13])
+    text(-220,13,'\delta (0.5-4 Hz)','FontSize',6,'color',clrs(3,:),'VerticalAlignment','top');
+    ylabel('Power (dB)')
+    line([-300,60],[0,0],'color','k');
+subplot(3,2,2);
+    plotwitherror(aligned.time,aligned.alpha_syn,'CI','LineWidth',1,'color',clrs(1,:));
     xlim([-240,60]);
-    ylim([-4,10])
-    gcaformat;
-    % line([0,0],[0,3],'color','k','LineWidth',1);
-    % text(0.43,9.1,'*')
-    % text(0.43,8.1,'*')
-    % text(0.43,7.1,'*')
+    ylabel('Power (dB)')
+    line([-300,60],[0,0],'color','k');
+    ylim([-2,7]);
+subplot(3,2,4);
+    plotwitherror(aligned.time,aligned.beta_syn,'CI','LineWidth',1,'color',clrs(2,:));
+    xlim([-240,60]);
+    ylabel('Power (dB)')
+    line([-300,60],[0,0],'color','k');
+    % ylim([-5,10])
+subplot(3,2,6);
+    plotwitherror(aligned.time,aligned.delta_syn,'CI','LineWidth',1,'color',clrs(3,:));
+    xlim([-240,60]);
+    ylabel('Power (dB)')
+    line([-300,60],[0,0],'color','k');
+    ylim([-4,7])
+gcaformat(gcf)
 

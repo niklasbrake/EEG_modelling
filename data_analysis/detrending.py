@@ -76,14 +76,25 @@ def uniLorenz(fScaled, *params):
 
 def biExp(fScaled, *params):
     tau1,tau2,ratio,mag = params[0]
-    tau2 = 4e-3;
+    # tau2 = 4e-3;
     # tau2 = 0;
-    tau1 = 20e-3
+    # tau1 = 20e-3
     ys = np.zeros_like(fScaled)
     x2 = (tau1-tau2)**2 / ((1+tau1**2*fScaled)*(1+tau2**2*fScaled));
     ys = ys + mag + np.log10(np.exp(ratio)+x2);
     return ys
 
+def biExp2(fScaled, *params):
+    tau1,tau2,ratio,mag = params[0]
+    tau2 = 4e-3;
+    tauE = 3e-3;
+    # tau2 = 0;
+    # tau1 = 20e-3
+    ys = np.zeros_like(fScaled)
+    x1 = np.exp(ratio) * tauE / (1+tauE**2*fScaled);
+    x2 = (tau1-tau2)**2 / ((1+tau1**2*fScaled)*(1+tau2**2*fScaled));
+    ys = ys + mag + np.log10(x1+x2);
+    return ys
 
 def syn_net(fScaled, *params):
     tau1,tau2,ratio,mag,mag2 = params[0]
@@ -165,10 +176,10 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
 
     # Aperiodic parameter bounds
     if(fitType=='exp2'):
-        # lb_ap = [7e-3,0,-20,3]
-        lb_ap = [10e-3,3e-3,-20,3.5]
-        ub_ap = [50e-3,5e-3,-9,4.8]
-        # ub_ap = [100e-3,30e-3,10,5]
+        lb_ap = [7e-3,1e-3,-20,1]
+        ub_ap = [100e-3,5e-3,-7,5]
+        # lb_ap = [10e-3,3e-3,-20,3.5]
+        # ub_ap = [50e-3,5e-3,-9,4.8]
         scale_ap = [5e-3,1e-3]
         full_model = full_model_exp2
         model_func = biExp
@@ -236,7 +247,10 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
             results = sp.optimize.least_squares(objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
             parsSave = results.x
     else:
-        pars0 = fit_initial(x_data,y_data[:,0],[lb_ap,ub_ap,lb_p,ub_p,model_func,emergent_power,startpoint])
+        # pars0 = fit_initial(x_data,y_data[:,0],[lb_ap,ub_ap,lb_p,ub_p,model_func,emergent_power,startpoint])
+        results1 = sp.optimize.least_squares(objective,startpoint,bounds=(lb,ub),args = [full_model,[x_data, y_data[:,0]]])
+        pars0 = results1.x
+
         m = y_data.shape[1]
         parsSave = np.zeros([m,len(pars0)])
         for i in range(m):

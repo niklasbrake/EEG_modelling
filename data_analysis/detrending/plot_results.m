@@ -3,69 +3,65 @@ dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 load(fullfile(dataFolder,'data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
-psd = [];
-aligned = load(fullfile(dataFolder,'data_aligned_detrended.mat'));
 rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
-% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save_rescaled.mat');
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\rescaled_20230701.mat')
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\Cz_multitaper_aligned.mat')
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save');
 rescaled.synPars(1:4,:,:) = permute(pars(:,1:4,:),[2,1,3]);
 
-for i = 1:4
-    temp = squeeze(rescaled.synPars(i,:,:));
-    temp = smoothdata(temp,'movmedian',5);
-    rescaled.synPars(i,:,:) = temp;
-end
+% for i = 1:4
+%     temp = squeeze(rescaled.synPars(i,:,:));
+%     temp = smoothdata(temp,'movmedian',5);
+%     rescaled.synPars(i,:,:) = temp;
+% end
 
 freq = rescaled.freq;
 
-%{
-ptIdx = 1;
-preExample = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,ptIdx),2);
-postExample = 10.^nanmedian(rescaled.psd(:,rescaled.time>0,ptIdx),2);
-[oofPre,oofFun] = getFOOOF(freq(freq<50),preExample(freq<50),false);
-[oofPost,oofFun] = getFOOOF(freq(freq<50),postExample(freq<50),false);
-[synPre,synFun] = synDetrend(freq(freq<100),preExample(freq<100),3,'exp2');
-[synPost,synFun,full_model] = synDetrend(freq(freq<100),postExample(freq<100),3,'exp2');
-
-%}
 
 
-
+[full_model,synFun] = fittingmodel('exp2');
 for i = 1:14
-    oofFit = []; synFit = [];
     for j = 1:size(rescaled.psd,2)
-        oofFit(:,j) = log10(oofFun(freq,rescaled.oofPars(:,j,i)));
         synFit(:,j) = synFun(freq,rescaled.synPars(1:4,j,i));
     end
     rescaled.syn_detrended(:,:,i) = rescaled.psd(:,:,i)-synFit;
-    rescaled.oof_detrended(:,:,i) = rescaled.psd(:,:,i)-oofFit;
 
     rescaled.pre(:,:,i) = rescaled.psd(:,:,i)-nanmedian(rescaled.psd(:,rescaled.time<-1,i),2);
-    rescaled.oof(:,:,i) = rescaled.oof_detrended(:,:,i)-nanmedian(rescaled.oof_detrended(:,rescaled.time<-1,i),2);
     rescaled.syn(:,:,i) = rescaled.syn_detrended(:,:,i)-nanmedian(rescaled.syn_detrended(:,rescaled.time<-1,i),2);
 
-    aligned.syn(:,:,i) = aligned.syn(:,:,i)-nanmedian(aligned.syn(:,aligned.time<t0(i),i),2);
+    synFitAligned = interp1(-t0(i)*rescaled.time',synFit',aligned.time,'cubic')';
+    aligned.syn(:,:,i) = 10* (log10(aligned.psd(:,:,i)) - synFitAligned);
+    P0(:,i) = nanmean(aligned.syn(:,aligned.time<t0(i),i),2);
 end
 
+% rescaled.pre(:,:,7) = nan;
+% rescaled.syn(:,:,7) = nan;
 
 
-
-deltaIdx = find(and(freq>1,freq<=4));
+deltaIdx = find(and(freq>=0.5,freq<4));
 alphaIdx = find(and(freq>=8,freq<15));
 betaIdx = find(and(freq>=15,freq<30));
-% betaIdx = find(and(freq>=30,freq<55));
 
 rescaled.alpha_pre = 10*squeeze(nanmean(rescaled.pre(alphaIdx,:,:)));
 rescaled.beta_pre = 10*squeeze(nanmean(rescaled.pre(betaIdx,:,:)));
 rescaled.delta_pre = 10*squeeze(nanmean(rescaled.pre(deltaIdx,:,:)));
 
-rescaled.alpha_oof = 10*squeeze(nanmean(rescaled.oof(alphaIdx,:,:)));
-rescaled.beta_oof = 10*squeeze(nanmean(rescaled.oof(betaIdx,:,:)));
-rescaled.delta_oof = 10*squeeze(nanmean(rescaled.oof(deltaIdx,:,:)));
-
 rescaled.alpha_syn = 10*squeeze(nanmean(rescaled.syn(alphaIdx,:,:)));
 rescaled.beta_syn = 10*squeeze(nanmean(rescaled.syn(betaIdx,:,:)));
 rescaled.delta_syn = 10*squeeze(nanmean(rescaled.syn(deltaIdx,:,:)));
+
+
+aligned.alpha_syn = squeeze(nanmean(aligned.syn(alphaIdx,:,:)));
+aligned.beta_syn = squeeze(nanmean(aligned.syn(betaIdx,:,:)));
+aligned.delta_syn = squeeze(nanmean(aligned.syn(deltaIdx,:,:)));
+aligned.alpha_pre = squeeze(nanmean(aligned.pre(alphaIdx,:,:)));
+aligned.beta_pre = squeeze(nanmean(aligned.pre(betaIdx,:,:)));
+aligned.delta_pre = squeeze(nanmean(aligned.pre(deltaIdx,:,:)));
+
+ptIdx = 1;
+preExample = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,ptIdx),2);
+postExample = 10.^nanmedian(rescaled.psd(:,rescaled.time>0,ptIdx),2);
+synPre = synDetrend(freq(freq<100),preExample(freq<100),3,'exp2');
+synPost = synDetrend(freq(freq<100),postExample(freq<100),3,'exp2');
 
 blue = clrsPT.qualitative_CM.blue;
 clrs = clrsPT.lines(3);
@@ -99,7 +95,7 @@ axes('Position',[0.2,0.62,0.08,0.25]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
 axes('Position',[0.34,0.62,0.19,0.3]);
-    imagesc(aligned.time,freq,10*nanmean(aligned.pre,3));
+    imagesc(aligned.time,freq,nanmean(aligned.pre,3));
     ylim([0.5,50])
     CB = colorbar('location','eastoutside');
     CB.Label.String = 'Power (dB)';
@@ -159,7 +155,8 @@ axes('Position',[0.2,0.15,0.08,0.25]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
 axes('Position',[0.34,0.15,0.19,0.3]);
-    imagesc(fulldata.time,fulldata.freq,nanmean(PSD-permute(P0,[1,3,2]),3))
+    % imagesc(aligned.time,aligned.freq,nanmean(aligned.syn-P0,3))
+    imagesc(aligned.time,aligned.freq,nanmean(aligned.syn-permute(P0,[1,3,2]),3))
     ylim([0.5,50])
     CB = colorbar('location','eastoutside');
     CB.Label.String = 'Power (dB)';

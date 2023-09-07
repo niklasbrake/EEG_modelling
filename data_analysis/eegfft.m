@@ -31,5 +31,5 @@ function [freq,time,psd] = eegfft(t,eeg,windowSize,overlap);
 	[K,f] = pmtm(temp(:,idcs),2,[],Fs); % 3 tapers
 	freq = f(2:end);
 	time = t(rachTs(:));
-	psd = zeros(length(freq),length(time));
+	psd = nan(length(freq),length(time));
 	psd(:,idcs) = K(2:end,:);

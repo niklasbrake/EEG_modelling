@@ -24,8 +24,11 @@ end
 % end
 function y = fitAP(tau1,tau2,ratio,mag,f)
 	y0 = (tau1-tau2)^2 ./ ((1+tau1^2*f.^2).*(1+tau2^2*f.^2));
+	% tauE = 1e-3;
+	y1 = exp(ratio);
 	% y0 = tau2 ./ (1+tau2^2*f.^2) .* (1 + mag * tau1 ./ (1+tau1^2*f.^2));
-	y = mag + log10(exp(ratio)+y0);
+	y = mag + log10(y1+y0);
+	% y = mag + log10(exp(ratio)+y0);
 	% y = log10(10^ratio * y0);
 end
 function y = syn_net(tau1,tau2,ratio,mag,mag2,f)

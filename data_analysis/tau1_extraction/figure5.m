@@ -96,6 +96,9 @@ for i = 1:14
 end
 
 ptIdx = 1;
+synPre(1,ptIdx)*1e3
+synPost(1,ptIdx)*1e3
+
 axes('Position',[0.11,0.09,0.22,0.26]);
     plot(freq,pre(:,ptIdx),'color','k','LineWidth',1);
     hold on;
@@ -109,7 +112,7 @@ axes('Position',[0.11,0.09,0.22,0.26]);
     gcaformat;
     xl = xlabel('Frequency (Hz)');
     xl.Position(1:2) = [150,1.1e-3];
-    yl = ylabel(['PSD (' char(956) 'V^2/Hz)'])
+    yl = ylabel(['PSD (' char(956) 'V^2/Hz)']);
     yl.Position(1) = 0.1;
     ylim([1e-2,1e3])
     set(get(gca,'yaxis'),'MinorTick','off');

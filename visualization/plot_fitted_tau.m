@@ -1,6 +1,6 @@
 load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis\fitted_spectra.mat')
-f = f(2:end);
-psd = psd(2:end,:);
+f = f(2:205);
+psd = psd(2:205,:);
 
 k = 6;
 
@@ -17,7 +17,7 @@ for j = 1:k
         tauE(i,j) = mean(pars(3,idcs(j0)));
         P_AMPA(:,i) = mean(psd(:,idcs(j0)),2);
     end
-    [params,synFun] = synDetrend(f,P_AMPA./P_AMPA(1,:),0,'lorenz',[15e-3,1e-3,0,-1]);
+    [params,synFun] = synDetrend(f,P_AMPA./P_AMPA(1,:),0,'lorenz',[15e-3,1e-3,-0.1,-0.5]);
     tau1(:,j) = params(:,2)*1e3;
     p_tauE(:,j) = mean(P_AMPA,2);
 end
@@ -34,35 +34,20 @@ for j = 1:k
         tauI(i,j) = mean(pars(4,idcs(j0)));
         P_GABA(:,i) = mean(psd(:,idcs(j0)),2);
     end
-    [params,synFun] = synDetrend(f,P_GABA./P_GABA(1,:),0,'lorenz',[15e-3,1e-3,0,-1]);
+    [params,synFun] = synDetrend(f,P_GABA./P_GABA(1,:),0,'lorenz',[mean(tauI(:,j))*1e-3,3e-3,-0.1,-0.5]);
     tau2(:,j) = params(:,1)*1e3;
     p_tauI(:,j) = mean(P_GABA,2);
 end
 
-
-
-
-clrs = clrsPT.sequential(k+5); clrs = clrs(5:end,:);
-
-
-
-dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
-sims = load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
-sims.P = sims.P;
-% sims.f = f;
-idcs = find(sims.f<100);
-p_fit = mean(sims.P(idcs,:)./mean(sims.P(1,:)),2);
-[params,synFun] = synDetrend(sims.f(idcs),p_fit,0,'lorenz',[15e-3,2e-3,0,-1]);
-
-
-
+p0 = mean(params);
 figureNB(8.3,2.7);
 B = 0.21;
 axes('Position',[0.13,0.28,B,0.64]);
-    plot(sims.f,mean(sims.P,2),'k','LineWidth',1);
+    plot(f,mean(P_GABA,2),'k','LineWidth',1);
     hold on;
-    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:3),-Inf]),'--r');
-    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:2),-Inf,params(4)]),'--r');
+    plot(f,mean(P_GABA(1,:))*10.^synFun(f,[p0(1:3),-Inf]).*(1+10^(p0(4)-p0(3))),'--r');
+    plot(f,mean(P_GABA(1,:))*10.^synFun(f,[p0(1:2),-Inf,p0(4)]),'--r');
+    % plot(f,mean(P(1,:))*10.^synFun(f,params),'-r');
     ylim([10^-16.5,10^-14.5]);
     yticks([1e-16,1e-15])
     set(gca,'yscale','log');
