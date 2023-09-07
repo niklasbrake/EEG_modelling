@@ -4,10 +4,13 @@ folder = '/lustre04/scratch/nbrake/data/simulations/mixed_input';
 
 [sa,X] = network_simulation_beluga.getHeadModel;
 
-compute_spectrum(sa,fullfile(folder,'baseline'))
-compute_spectrum(sa,fullfile(folder,'high_aperiodic'))
-compute_spectrum(sa,fullfile(folder,'high_both'))
-compute_spectrum(sa,fullfile(folder,'high_oscillation'))
+% compute_spectrum(sa,fullfile(folder,'baseline'))
+% compute_spectrum(sa,fullfile(folder,'high_aperiodic'))
+% compute_spectrum(sa,fullfile(folder,'high_both'))
+% compute_spectrum(sa,fullfile(folder,'high_oscillation'))
+compute_spectrum(sa,fullfile(folder,'oscillation_only'))
+compute_spectrum(sa,fullfile(folder,'aperiodic_only'))
+
 
 end
 function compute_spectrum(sa,folder)
