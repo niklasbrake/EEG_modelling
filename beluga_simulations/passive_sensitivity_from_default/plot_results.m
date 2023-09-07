@@ -136,7 +136,7 @@ load(fullfile(dataFolder,'simulation_passive_different_tau_decay.mat'),'GABAR_ta
 idcs = find(sims.f<100);
 [params,synFun] = synDetrend(sims.f(sims.f<100),mean(sims.P(sims.f<100,:),2)./mean(sims.P(1,:)),0,'lorenz',[15e-3,1e-3,0,-1]);
 
-% figureNB;
+figureNB;
 % subplot(2,8,1);
 axes('Position',[0.066,0.67,0.1,0.3]);
     plot(sims.f,sims.P,'color',[0.6,0.6,0.6,0.1])
@@ -155,8 +155,9 @@ axes('Position',[0.066,0.67,0.1,0.3]);
 axes('Position',[0.21,0.67,0.1,0.3]);
     plot(sims.f,mean(sims.P,2),'k','LineWidth',1);
     hold on;
-    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:3),-Inf]),'--r');
-    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:2),-Inf,params(4)]),'--r');
+    plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,params),'--r');
+    % plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:3),-Inf]),'--r');
+    % plot(sims.f,mean(sims.P(1,:))*10.^synFun(sims.f,[params(1:2),-Inf,params(4)]),'--r');
     % ylim([10^-16.5,10^-14.5]);
     ylim([10^-17,10^-14]);
     yticks([1e-16,1e-15])

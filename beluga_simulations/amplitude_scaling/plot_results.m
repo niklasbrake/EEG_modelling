@@ -3,6 +3,7 @@
 % if(nargin<1)
 %     error('Path to data required as input argument. Data can be downloaded from link in README file.');
 % end
+dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 psd = [];
 % Get surface area of each triangle
 [sa,X] = network_simulation_beluga.getHeadModel;
@@ -76,8 +77,6 @@ ax = axes('Position',[0.11,0.515,0.4,0.5]);
     paint_mesh(C./max(C));
     view([120,10]);
     fix_lighting;
-    colormap(ax,clrsPT.sequential(100))
-    set(gca,'CLim',[0,1]);
 
     VW = get(gca,'view');
     [a1,a2,a3] = sph2cart((VW(1)-90)*pi/180,VW(2)/180*pi,1);
@@ -143,10 +142,15 @@ for i = 1:14
 end
 
 % Get simulated passive spectrum
-load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
-asynchUnitarySpec = mean(mean(P(:,:,:),3),2);
-SIG0 = sum(asynchUnitarySpec*mean(diff(f)));
-P0 = interp1(f,asynchUnitarySpec,freq);
+% load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
+% asynchUnitarySpec = mean(mean(P(:,:,:),3),2);
+% SIG0 = sum(asynchUnitarySpec*mean(diff(f)));
+% P0 = interp1(f,asynchUnitarySpec,freq);
+
+modelPSD = load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\fitted_spectra.mat')
+asynchUnitarySpec = mean(modelPSD.psd(:,:,:),2);
+SIG0 = sum(asynchUnitarySpec*mean(diff(modelPSD.f)));
+P0 = interp1(modelPSD.f,asynchUnitarySpec,freq);
 
 % Plot
 red = [0.8000    0.2980    0.0078];
@@ -199,7 +203,7 @@ ax = axes('Position',[0.55 0.15 0.23 0.23*8.5/6]);
     xl.Position(2) = -2.13;
     CM = clrsPT.iridescent(1e3);
     CM = interp1(linspace(0,1,1e3),CM,linspace(0,0.98,1e3).^2,'nearest');
-    colormap(ax,CM);
+    % colormap(ax,CM);
     CB = colorbar('location','eastoutside');
     CB.Label.String = 'Total EEG power (uV^2)';
     CB.Label.FontSize=7;
@@ -216,7 +220,7 @@ ax = axes('Position',[0.55 0.15 0.23 0.23*8.5/6]);
      % (c-log10(200))./(0.05+(c-log10(200))).*(c>log10(200));
 
     CM2 = interp1(t,CM,cScale);
-    colormap(gca,CM2)
+    colormap(ax,CM2)
 
 
 labelpanel(0.07,0.92,'a',true);
@@ -227,8 +231,8 @@ labelpanel(0.44,0.48,'c',true);
 
 
 
-dscale = [0,10.^linspace(-2,0,991),1.01:0.01:10];
-t = [0,10.^linspace(-3,-1,481),0.1:0.001:1];
+dscale = [0,10.^linspace(-2,0,991),1.01:0.01:13.1];
+t = [0,10.^linspace(-3,-1,481),0.101:0.001:1];
 t = t(:);
 tt = zeros(length(dscale),length(t));
 for i = 1:length(dscale)
@@ -237,7 +241,7 @@ for i = 1:length(dscale)
     tt(i,:) = SIG0*SIG_N(t*rho_bar);
 end
 
-idcs = interp1(dscale,1:length(dscale),[1,5,10],'nearest');
+idcs = interp1(dscale,1:length(dscale),[5,13],'nearest');
 
 figureNB;
     clrs = clrsPT.sequential(6);
@@ -252,3 +256,7 @@ figureNB;
     line(get(gca,'xlim'),[200,200],'color','k','LineStyle','--','LineWidth',1);
     ylabel(['Total EEG power (' char(956) 'V^2)'])
     xlabel('\rho_{max}')
+    rho1 = interp1(tt(idcs(1),:),t,200)
+    rho2 = interp1(tt(idcs(2),:),t,200)
+    plot(rho1,200,'.k','MarkerSize',20);
+    plot(rho2,200,'.k','MarkerSize',20);

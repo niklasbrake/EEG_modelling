@@ -32,10 +32,10 @@ synSphCoord = [phi(:),thet(:)];
 [~,I] = sort(J);
 ids = I(ids);
 
-% nrnID = cons(I,1);
-% [nrnID,J] = sort(nrnID);
-% [~,I] = sort(J);
-% ids = J(ids);
+nrnID = cons(I,1);
+[nrnID,J] = sort(nrnID);
+[~,I] = sort(J);
+ids = J(ids);
 
 [ids_spaceshuffle,ts_spaceshuffle] = network.getprenetwork(fullfile(network.preNetwork,'spikeTimes_spaceshuffle.csv'));
 [ids_timeshuffle,ts_timeshuffle] = network.getprenetwork(fullfile(network.preNetwork,'spikeTimes_timeshuffle.csv'));
@@ -351,41 +351,40 @@ axes('Position',[0,0,1,1]);
 
 
 load('E:\Research_Projects\004_Propofol\data\simulations\raw\synthetic_spikes\synthetic_spikes_analyzed.mat')
-R = repmat(1:6,1,11);
-for i = 1:length(R)
+shuffle = load('E:\Research_Projects\004_Propofol\data\simulations\raw\synthetic_spikes\synthetic_spikes_space_analyzed.mat')
+
+for i = 1:size(dipoles,4)
     C(i,1) = corr(dipoles(:,1,1,i),dipoles(:,1,2,i));
     C(i,2) = corr(dipoles(:,2,1,i),dipoles(:,2,2,i));
     C(i,3) = corr(dipoles(:,3,1,i),dipoles(:,3,2,i));
 end
 
+for i = 1:size(dipoles,4)
+    C_spaceshuffle(i,1) = corr(shuffle.dipoles(:,1,1,i),shuffle.dipoles(:,1,2,i));
+    C_spaceshuffle(i,2) = corr(shuffle.dipoles(:,2,1,i),shuffle.dipoles(:,2,2,i));
+    C_spaceshuffle(i,3) = corr(shuffle.dipoles(:,3,1,i),shuffle.dipoles(:,3,2,i));
+end
 
-figureNB;
-plot(R,nanmean(C,2),'.k','MarkerSize',20)
-hold on;
-plot(1:6,splitapply(@nanmean,nanmean(C,2)',R),'-k');
 
 cr = reshape(nanmean(C,2),[6,11])';
-
+cr_shuffle = reshape(nanmean(C_spaceshuffle,2),[6,11])';
 rRange = 10.^linspace(-4,-1,6);
 
 m0 = nanmean(cr);
-s = stderror(cr);
-figureNB;
+s0 = stderror(cr);
+
+m1 = nanmean(cr_shuffle);
+s1 = stderror(cr_shuffle);
+
+figureNB(3.2,3.2);
     plot(rRange,m0,'.-k','LineWidth',1,'MarkerSize',10)
     hold on;
-    line([rRange;rRange],[m0-1.96*s;m0+1.96*s],'color','k','LineWidth',1)
+    line([rRange;rRange],[m0-1.96*s0;m0+1.96*s0],'color','k','LineWidth',1)
+    plot(rRange,m1,'.-','color',[0.6,0.6,0.6],'LineWidth',1,'MarkerSize',10)
+    hold on;
+    line([rRange;rRange],[m1-1.96*s1;m1+1.96*s1],'color',[0.6,0.6,0.6],'LineWidth',1)
     set(gca,'xscale','log');
     xlim([1e-4,0.0252])
     ylabel('Dipole correlation')
     xlabel('Synapse correlation (R_{max})')
-
-figureNB(5.25,1)
-X = eeg(1.1e5:1.4e5,:);
-axes('Position',[0,0,1,1])
-    plot(X(:,1),'color','r')
-    hold on;
-    plot(X(:,2),'color','k')
-    line([38e3-250*16,38e3],[-0.5,-0.5]*1e-6,'color','k','LineWidth',1)
-    line([38e3-250*16,38e3-250*16],[-0.25,0.75]*1e-6,'color','k','LineWidth',1)
-    xlim([1,40e3]);
-    axis off;
+    gcaformat
