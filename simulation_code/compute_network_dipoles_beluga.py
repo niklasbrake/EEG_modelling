@@ -56,7 +56,7 @@ def addsyns(nrnID,connection_data,preEI,preSpikes,parameters):
 
     return synParams,synTimes
 
-def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX=100):
+def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX):
 
     # Initialize neuron morphology
     nrnM = init_neuron(connection_data['mFile'],parameters)

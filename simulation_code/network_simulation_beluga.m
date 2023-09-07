@@ -383,7 +383,7 @@ classdef network_simulation_beluga
             dlmwrite(fullfile(obj.postNetwork,'connections.csv'),data,'delimiter',',','precision','%d');
         end
 
-        function obj = simulate(obj,savefilename,toDelete)
+        function obj = simulate(obj,savefilename)
             if(isempty(obj.savePath))
                 error('Output directory (obj.savePath) must be specified.');
             end
@@ -396,10 +396,7 @@ classdef network_simulation_beluga
             if(nargin<2)
                 savefilename = 'simulation_data.mat';
             end
-            if(nargin<3)
-                toDelete = 'True';
-            end
-            parFile = [savefilename(1:end-4) '_parameters.json'];
+            parFile = '_parameters.json';
 
             if(strcmp(filesep,'\'))
                 savePath = strrep(obj.savePath,'\','/');
@@ -416,7 +413,7 @@ classdef network_simulation_beluga
                 error(['Property *resourceFolder* does not point to data and needs to be changed on line 15 of file ' wd '. If you have not downloaded the data, it is accesible via the link in the README.']);
             end
 
-            params = strjoin({char(postNetwork),char(obj.spikingFile),char(savePath),char(int2str(obj.tmax)),char(parFile)});
+            params = strjoin({char(postNetwork),char(obj.spikingFile),char(savePath),char(int2str(obj.tmax))});
 
             str = jsonencode(obj.parameters);
             fid = fopen(fullfile(obj.savePath,parFile),'w');
@@ -430,7 +427,7 @@ classdef network_simulation_beluga
             pySimulate(params,fullfile(functionFolder,'compute_network_dipoles_beluga.py'));
 
             % Convert NPY files to mat files
-            params = strjoin({char(obj.savePath),char(savefilename),char(toDelete)});
+            params = strjoin({char(obj.savePath),char(savefilename)});
             pySimulate(params,fullfile(functionFolder,'npy2mat.py'));
 
             pars = obj.parameters;

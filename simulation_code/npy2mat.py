@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import sys
 
-def main(path,filename,toDelete):
+def main(path,filename):
     npzFiles = glob.glob(path + "/*.npy")
     for i,f in enumerate(npzFiles):
         d = np.load(f)
@@ -28,10 +28,6 @@ def main(path,filename,toDelete):
     savemat(fm, {'dipoles':dipoles,'time':t.T,'V':Vm.T})
     print('Done (',path, ')')
 
-    if(toDelete):
-        import os
-        for f in npzFiles:
-            os.remove(f)
 
 if __name__ == "__main__":
     pars = sys.argv
@@ -40,9 +36,5 @@ if __name__ == "__main__":
         filename = pars[2]
     else:
         filename = 'simulation_data.mat'
-    if(len(pars)>3):
-        toDelete = (pars[3]=='True')
-    else:
-        toDelete = False
-    main(path,filename,toDelete)
+    main(path,filename)
 
