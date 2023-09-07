@@ -1,7 +1,8 @@
-folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\_archive\critical_embedding';
-network = network_simulation_beluga(folder);
-network = network.initialize_postsynaptic_network(2,[1,2]);
-network.tmax = 50e3;
+% folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\_archive\critical_embedding';
+% network = network_simulation_beluga(folder);
+% network = network.initialize_postsynaptic_network(2,[1,2]);
+% network.tmax = 50e3;
+load('E:\Research_Projects\004_Propofol\data\simulations\raw\test\connected_components\CC1\model.mat')
 N = network.getsynapsecount;
 
 % Get synapse spikes times

@@ -9,7 +9,7 @@ pars.p = 0.17;
 pars.alpha = 0.2;
 
 A = 5;
-L = 0;
+L = 0.98;
 pars.w = L*2/(N*pars.p*(1-pars.alpha) - pars.g*N*pars.p*pars.alpha/A);
 
 ei = zeros(N,1);

@@ -1,6 +1,8 @@
 function [xSyn,mData,ei] = checkEmbedding(network)
 
-    mType = network.neurons(1).mType;
+    mID = 1;
+
+    mType = network.neurons(mID).mType;
     mTypeSegmentationData = fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','morphology_segmentations.mat');
     load(mTypeSegmentationData)
     mData = nrnSegs.(mType);
@@ -8,7 +10,7 @@ function [xSyn,mData,ei] = checkEmbedding(network)
     X = [mean(mData.x,2),mean(mData.y,2),mean(mData.z,2)];
     % cons = csvread('E:\Research_Projects\004_Propofol\data\simulations\raw\osc_2ndOrder\postsynaptic_network\connections.csv');
     cons = csvread(fullfile(network.postNetwork,'connections.csv'));
-    idcs = find(cons(:,1)==1);
+    idcs = find(cons(:,1)==mID);
 
     xSyn = X(cons(idcs,2),:);
     C = cons(idcs,3);
