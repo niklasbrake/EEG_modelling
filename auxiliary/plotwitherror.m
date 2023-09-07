@@ -39,6 +39,7 @@ function [h,F] =plotwitherror(x,y,isstdrr,varargin)
 			end
 		end
 	end
+	length(region)
 	for i = 1:length(region)
 		xfvec = [x(region{i}),flip(x(region{i}))];
 		yfvec = [ylo(region{i});flip(yhi(region{i}))];
