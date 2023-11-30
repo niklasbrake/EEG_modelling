@@ -7,8 +7,8 @@ function [params,synFun,full_model] = synDetrend(f,P,nPeaks,fitType,startPoint)
     end
     if(nargin<4)
         fitType = 'exp2';
-    elseif(~strcmp(fitType,'exp2') && ~strcmp(fitType,'lorenz') && ~strcmp(fitType,'syn_net') && ~strcmp(fitType,'avalanches'))
-        error('fitType must be either ''exp2'' or ''lorenz'' or ''syn_net'' or ''avalanches''');
+    elseif(~strcmp(fitType,'exp2') && ~strcmp(fitType,'lorenz') && ~strcmp(fitType,'unilorenz') && ~strcmp(fitType,'avalanches'))
+        error('fitType must be either ''exp2'' or ''lorenz'' or ''unilorenz'' or ''avalanches''');
     end
     if(nargin<5)
         startPointsFile = '""';

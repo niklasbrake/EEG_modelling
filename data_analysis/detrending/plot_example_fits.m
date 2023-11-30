@@ -9,13 +9,16 @@ aligned = load(fullfile(dataFolder,'data_aligned_detrended.mat'));
 rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
 freq = rescaled.freq;
 
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\_ncomm\pre_post.mat','p1','p0');
+[full_model,synFun] = fittingmodel('exp2');
+
 figureNB(21,4.3);
 for i = 1:14
     subplot(2,14,i);
         y = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,i),2);
         % y0 = 10.^synFun(freq,p0(:,i));
-        pp = p0(1:4,i); pp(2) = min(pp(2),50e-3);
-        [px,synFun,full_model] = synDetrend(freq(freq<100),y(freq<100),1,'exp2',[1e-2,4e-3,-10,4]);
+        px = p0(:,i);
+        % [px,synFun,full_model] = synDetrend(freq(freq<100),y(freq<100),3,'exp2',pp);
         y0 = 10.^synFun(freq,px);
         plot(freq,y,'k','LineWidth',1); hold on;
         h0 = plot(freq,y0,'LineWidth',1,'color','b');  hold on
@@ -79,8 +82,7 @@ for i = 1:14
         idx = find(and(rescaled.time*-t0(i)>0-10,rescaled.time*-t0(i)<=0));
         y = 10.^nanmedian(rescaled.psd(:,idx,i),2);
         % y0 = 10.^synFun(freq,p1(:,i));
-        pp = p1(1:4,i); pp(2) = min(pp(2),50e-3);
-        [px,synFun,full_model] = synDetrend(freq(freq<100),y(freq<100),2,'exp2',pp);
+        px = p1(:,i);
         y0 = 10.^synFun(freq,px);
         plot(freq,y,'k','LineWidth',1); hold on;
         h0 = plot(freq,y0,'LineWidth',1,'color','b');  hold on
@@ -202,6 +204,7 @@ for i = 1:5
         ylabel(['PSD (' char(956) 'V^2/Hz)']);
     end
 end
+%{
 
 tcov = linspace(0,0.300,1e3);
 ecov = exp(-tcov/mean(P(1,:)))-exp(-tcov/mean(P(2,:)));
@@ -219,3 +222,4 @@ Yp = filter(b,a,60*(filter(ecov,1,N)+0.1*randn(size(N))+0.2*sin(2*pi*t0(:)*10)))
 subplot(3,1,3);
     plot(t0,Yp,'color','k');
     ylim([-50,60]);
+%}

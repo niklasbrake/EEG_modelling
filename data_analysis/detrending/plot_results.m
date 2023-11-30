@@ -3,20 +3,16 @@ dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 load(fullfile(dataFolder,'data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
-rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\Cz_multitaper_aligned.mat')
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save');
+% rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
+rescaled = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\rescaled_time\electrode2_Cz.mat');
+rescaled.psd = log10(rescaled.psd);
+
+rescaled.time = rescaled.tRescaled;
+aligned = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\aligned_time\electrode2_Cz.mat');
+
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled\electrode2_Cz.mat','pars');
 rescaled.synPars(1:4,:,:) = permute(pars(:,1:4,:),[2,1,3]);
-
-% for i = 1:4
-%     temp = squeeze(rescaled.synPars(i,:,:));
-%     temp = smoothdata(temp,'movmedian',5);
-%     rescaled.synPars(i,:,:) = temp;
-% end
-
 freq = rescaled.freq;
-
-
 
 [full_model,synFun] = fittingmodel('exp2');
 for i = 1:14
@@ -33,11 +29,7 @@ for i = 1:14
     P0(:,i) = nanmean(aligned.syn(:,aligned.time<t0(i),i),2);
 end
 
-% rescaled.pre(:,:,7) = nan;
-% rescaled.syn(:,:,7) = nan;
-
-
-deltaIdx = find(and(freq>=0.5,freq<4));
+deltaIdx = find(and(freq>=1,freq<=4));
 alphaIdx = find(and(freq>=8,freq<15));
 betaIdx = find(and(freq>=15,freq<30));
 
@@ -57,9 +49,15 @@ aligned.alpha_pre = squeeze(nanmean(aligned.pre(alphaIdx,:,:)));
 aligned.beta_pre = squeeze(nanmean(aligned.pre(betaIdx,:,:)));
 aligned.delta_pre = squeeze(nanmean(aligned.pre(deltaIdx,:,:)));
 
+for i = 1:200
+    i0 = find(isoutlier(rescaled.delta_syn(i,:)));
+    rescaled.delta_syn(i,i0) = nan;
+end
+
 ptIdx = 1;
 preExample = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,ptIdx),2);
-postExample = 10.^nanmedian(rescaled.psd(:,rescaled.time>0,ptIdx),2);
+idcs = find(and(aligned.time>0,aligned.time<10));
+postExample = nanmedian(aligned.psd(:,idcs,ptIdx),2);
 synPre = synDetrend(freq(freq<100),preExample(freq<100),3,'exp2');
 synPost = synDetrend(freq(freq<100),postExample(freq<100),3,'exp2');
 
@@ -73,8 +71,8 @@ axes('Position',[0.07,0.62,0.08,0.25]);
     set(gca,'xscale','log');
     set(gca,'yscale','log');
     xlabel('Frequency (Hz)');
-    ylim([1e-2,1e4]);
-    yticks(10.^[-2:2:4]);
+    ylim([1e-4,1e4]);
+    yticks(10.^[-4:4:4]);
     ylabel(['PSD (' char(956) 'V^2/Hz)']);
     xlim([0.5,100]);
     xticks([0.5,5,50]);
@@ -91,7 +89,7 @@ axes('Position',[0.2,0.62,0.08,0.25]);
     set(get(gca,'xaxis'),'MinorTick','off');
     set(get(gca,'yaxis'),'MinorTick','off');
     xlabel('Frequency (Hz)');
-    ylim([-10,20]);
+    ylim([-15,20]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
 axes('Position',[0.34,0.62,0.19,0.3]);
@@ -125,7 +123,7 @@ ax1 = axes('Position',[0.82,0.62,0.15,0.3]);
     text(-1.3,7,'\beta (15-30 Hz)','FontSize',6,'Color',clrs(2,:));
     text(-1.3,12,'\delta (1-4 Hz)','FontSize',6,'Color',clrs(3,:));
 
-synPost = [0.047,0.0075,-14.25,4.3];
+% synPost = [0.047,0.0075,-14.25,4.3];
 axes('Position',[0.07,0.15,0.08,0.25]);
     plot(freq,postExample,'k','LineWidth',1); hold on;
     plot(freq,10.^synFun(freq,synPost),'LineWidth',1,'color',blue);  hold on
@@ -137,8 +135,8 @@ axes('Position',[0.07,0.15,0.08,0.25]);
     set(get(gca,'xaxis'),'MinorTick','off');
     set(get(gca,'yaxis'),'MinorTick','off');
     xlabel('Frequency (Hz)');
-    ylim([1e-2,1e4]);
-    yticks(10.^[-2:2:4]);
+    ylim([1e-4,1e4]);
+    yticks(10.^[-4:4:4]);
     ylabel(['PSD (' char(956) 'V^2/Hz)']);
 axes('Position',[0.2,0.15,0.08,0.25]);
     plot(freq,10*(log10(postExample)-synFun(freq,synPost)),'k','LineWidth',1);
@@ -151,7 +149,7 @@ axes('Position',[0.2,0.15,0.08,0.25]);
     set(get(gca,'xaxis'),'MinorTick','off');
     set(get(gca,'yaxis'),'MinorTick','off');
     xlabel('Frequency (Hz)');
-    ylim([-10,20]);
+    ylim([-15,20]);
     % ylabel('Power (dB)');
     ylabel('Power (dB)')
 axes('Position',[0.34,0.15,0.19,0.3]);
@@ -220,12 +218,14 @@ end
 
 dt = rescaled.time(2)-rescaled.time(1);
 
+alpha = 0.05;
+
 idx = [2,1,3];
 axes(ax1)
     for j = 1:3
         for i = 1:length(rescaled.time2)
             t1 =rescaled.time2(i);
-            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,2,2]*(rescaled.p(i,j)<0.05)+12+2*idx(j),clrs(j,:),'LineStyle','none');
+            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,2,2]*(rescaled.p(i,j)<alpha)+12+2*idx(j),clrs(j,:),'LineStyle','none');
             hold on
         end
     end
@@ -242,7 +242,7 @@ axes(ax2);
     for j = 1:3
         for i = 1:length(rescaled.time2)
             t1 =rescaled.time2(i);
-            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,1,1]*(rescaled.p_syn(i,j)<0.05)+6+idx(j),clrs(j,:),'LineStyle','none');
+            fill([t1,t1+k*dt,t1+k*dt,t1],[0,0,1,1]*(rescaled.p_syn(i,j)<alpha)+6+idx(j),clrs(j,:),'LineStyle','none');
             hold on
         end
     end
@@ -262,9 +262,12 @@ for i = 1:14
     idcs = find(and(tt>=-10,tt<=0));
     post(:,i) = 10*nanmedian(rescaled.pre(:,idcs,i),2);
 end
-A = nanmean(post(alphaIdx,:)); signtest(A,0,'tail','right')
-B = nanmean(post(betaIdx,:)); signtest(B,0,'tail','right')
-D = nanmean(post(deltaIdx,:)); signtest(D,0,'tail','right')
+% A = nanmean(post(alphaIdx,:)); signtest(A,0,'tail','right')
+% B = nanmean(post(betaIdx,:)); signtest(B,0,'tail','right')
+% D = nanmean(post(deltaIdx,:)); signtest(D,0,'tail','right')
+A = nanmean(post(alphaIdx,:)); fprintf('\\alpha: p=%f\n',signtest(A,0,'tail','right'));
+B = nanmean(post(betaIdx,:)); fprintf('\\beta: p=%f\n',signtest(B,0,'tail','right'));
+D = nanmean(post(deltaIdx,:)); fprintf('\\delta: p=%f\n',signtest(D,0,'tail','right'));
 axes('Position',[0.65,0.62,0.12,0.3]);
     plotwitherror(rescaled.freq,post,'CI','color','k','LineWidth',1);
     set(gca,'xscale','log');
@@ -297,9 +300,9 @@ for i = 1:14
     idcs = find(and(tt>=-10,tt<=0));
     post_syn(:,i) = 10*nanmedian(rescaled.syn(:,idcs,i),2);
 end
-A_syn = nanmean(post_syn(alphaIdx,:)); signtest(A_syn,0,'tail','right')
-B_syn = nanmean(post_syn(betaIdx,:)); signtest(B_syn,0,'tail','right')
-D_syn = nanmean(post_syn(deltaIdx,:)); signtest(D_syn,0,'tail','right')
+A_syn = nanmean(post_syn(alphaIdx,:)); fprintf('\\alpha: p=%f\n',signtest(A_syn,0,'tail','right'));
+B_syn = nanmean(post_syn(betaIdx,:)); fprintf('\\beta: p=%f\n',signtest(B_syn,0,'tail','right'));
+D_syn = nanmean(post_syn(deltaIdx,:)); fprintf('\\delta: p=%f\n',signtest(D_syn,0,'tail','right'));
 axes('Position',[0.65,0.15,0.12,0.3]);
     plotwitherror(rescaled.freq,post_syn,'CI','color','k','LineWidth',1);
     set(gca,'xscale','log');

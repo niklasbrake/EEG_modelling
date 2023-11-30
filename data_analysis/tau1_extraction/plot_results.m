@@ -1,9 +1,3 @@
-function figure5(dataFolder)
-
-if(nargin<1)
-    error('Path to data required as input argument. Data can be downloaded from link in README file.');
-end
-
 eeg_example = load(fullfile(dataFolder,'data_sample_time_series.mat'));
 psd = [];
 
@@ -134,11 +128,8 @@ axes('Position',[0.36,0.09,0.22,0.26]);
     text(0.6,3e-2,'Pre-LOC (pt.1)','FontSize',7,'color','k')
 
 
-
-% load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
-% tau = squeeze(synPars(1,:,:))*1e3;
-
-fits = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save.mat');
+% fits = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\_ncomm\fits_rescaled_time.mat');
+fits = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled\electrode2_Cz.mat');
 fits.time = linspace(-1.5,0.5,200);
 tau = squeeze(fits.pars(:,1,:))*1e3;
 

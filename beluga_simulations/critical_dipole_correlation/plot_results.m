@@ -200,7 +200,7 @@ scaling_factor = rho_max/M_S1(end-1);
 interp1(M_Sub,S,rho_max,'linear')
 
 subplot(2,2,4);
-    plotwitherror(freq(freq<100),pre(freq<100,:),'CI','color',[0.5,0.5,0.5]);
+    plotwitherror(freq(freq<100),pre(freq<100,:),'M','color',[0.5,0.5,0.5]);
     h=[];
     for i = 1:length(m)
         y = psd(:,:,i);

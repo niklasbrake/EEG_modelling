@@ -13,13 +13,6 @@ tauWhittington2 = [17.5,17.5,19,22.5,50,75]/17.5;
 pWhittington1 = [0,0.5,1,2,5,10];
 tauWhittington1 = [17.5,17.5,19,48,58,75]/17.5;
 
-% pWhittington1 = pOrser;
-% tauWhittington1 = tauOrser;
-
-
-pWhittington2 = pOrser;
-tauWhittington2 = tauOrser;
-
 [PP,I] = sort([pOrser,pKita,pWhittington1,pWhittington2]);
 TT = [tauOrser,tauKita,tauWhittington1,tauWhittington2];
 TT = TT(I)-1;
@@ -27,78 +20,11 @@ TT = TT(I)-1;
 ftfun = fittype('a*x.^n./(k.^n + x.^n)');
 FT = fit(PP(:),TT(:),ftfun,'StartPoint',[3,1,1],'Lower',[0,0,0],'Upper',[Inf,Inf,8])
 confInt = predint(FT,PP);
-%{
-
-figureNB
-subplot(1,4,1);
-    % plotwitherror(tvec,tau_unscaled,'CI','color','k');
-    plotwitherror(tRescaled,1e3*squeeze(params(1,:,:)),'CI','color','k');
-    xlabel('LOC-aligned time (s)');
-    ylabel(['\tau (ms)'])
-    % xlim([-200,60])
-    xlim([-1.5,0.5]);
-    xticks([-1,0])
-    xticklabels({'Infusion','LOC'})
-subplot(1,4,2);
-    for i = 1:14
-        plot(t{i}./dt(i),p{i},'color',[0.6,0.6,0.6]);
-        hold on;
-    end
-    xlabel('LOC-aligned time (s)');
-    ylabel(['Effect-site concentration (' char(956) 'M)'])
-    % xlim([-200,60])
-    xlim([-1.5,0.5]);
-    xticks([-1,0])
-    xticklabels({'Infusion','LOC'})
-subplot(1,4,3);
-    scatter(pum(:),tauFold(:),2,[0.5,0.5,0.5],'filled','MarkerFaceAlpha',0.2);
-    hold on;
-    % plot(nanmedian(pVec2,2),nanmedian(tauSmooth,2),'k')
-    plot(pBins,M,'color','k','LineWidth',1);
-    set(gca,'xscale','log');
-    xlabel(['Effect-site concentration (' char(956) 'M)']);
-    ylabel('Estimated \tau (fold change)')
-    ylabel('\tau (fold change)')
-    xlim([0.01,10])
-    line(get(gca,'xlim'),[1,1],'lineStyle','--','color','k')
-    % plotPaperResults
-
-
-ke0 = 10.^linspace(log10(0.26),log10(1.21),10);
-clrs = clrsPT.sequential(length(ke0)+4);
-clrs = clrs(4:end,:);
-subplot(1,4,4);
-for i = 1:length(ke0)
-    e0 = ke0(i);
-    [t,p,pum,tauFold,pBins,M] = marsh_model(e0);
-    plot(pBins,M,'color',clrs(i,:)*0.7+0.3,'LineWidth',1);
-    hold on;
-end
-set(gca,'xscale','log');
-xlabel(['Effect-site concentration (' char(956) 'M)']);
-ylabel('Estimated \tau (fold change)')
-xlim([0.01,10])
-ylim([0.5,3.5]);
-line(get(gca,'xlim'),[1,1],'lineStyle','--','color','k')
-plotPaperResults;
-
-
-PP_test = linspace(0.01,100,1e3);
-confInt = predint(FT,PP_test);
-plot(PP_test,FT(PP_test)+1,'k','LineWidth',1,'LineStyle','--');
-% F = fill([sort(PP_test),fliplr(sort(PP_test))],1+[confInt(:,1);flipud(confInt(:,2))],'b','LineStyle','none','FaceAlpha',0.1)
-
-gcaformat(gcf);
-
-
-%}
-
 
 figureNB(8,3.4)
 subplot(1,2,1);
     scatter(pum(:),tauFold(:),2,[0.5,0.5,0.5],'filled','MarkerFaceAlpha',0.2);
     hold on;
-    % plot(nanmedian(pVec2,2),nanmedian(tauSmooth,2),'k')
     plot(pBins,M,'color','k','LineWidth',1);
     set(gca,'xscale','log');
     xl = xlabel(['Estimated effect-site propofol concentration (' char(956) 'M)']);
@@ -110,39 +36,42 @@ subplot(1,2,1);
     xticklabels([0.01,0.1,1,10]);
     line(get(gca,'xlim'),[1,1],'lineStyle','--','color','k')
     ylim([0,4.5])
-    % plotPaperResults
 ke0 = 10.^linspace(log10(0.26),log10(1.21),10);
 clrs = clrsPT.sequential(length(ke0)+4);
 clrs = clrs(4:end,:);
 subplot(1,2,2);
-% for i = 1:length(ke0)
-%     e0 = ke0(i);
-%     [t,p,pum,tauFold,pBins,M] = marsh_model(e0);
-%     plot(pBins,M,'color',clrs(i,:)*0.7+0.3,'LineWidth',1);
-%     hold on;
-% end
-% plot(pBins,M,'color','k','LineWidth',2);
-scatter(pum(:),tauFold(:),2,[0.5,0.5,0.5],'filled','MarkerFaceAlpha',0.2);
-hold on;
-set(gca,'xscale','log');
-% xlabel(['Effect-site concentration (' char(956) 'M)']);
-ylabel('\tau_1 (fold change)')
-xlim([0.01,10])
-xticks([0.01,0.1,1,10]);
-xticklabels([0.01,0.1,1,10]);
-ylim([0.5,3.5]);
-line(get(gca,'xlim'),[1,1],'lineStyle','--','color','k')
-plotPaperResults;
-ylim([0,4.5])
+    % scatter(pum(:),tauFold(:),2,[0.5,0.5,0.5],'filled','MarkerFaceAlpha',0.2);
+
+% [X,Y] = meshgrid(log10(pum(:)),tauFold(:));
+    [X,Y] = meshgrid(linspace(-2,1,200),linspace(0,4,200));
+    k = 200;
+    [K,xi] = ksdensity([log10(pum(:)), tauFold(:)],[X(:),Y(:)],'BandWidth',0.1,'Kernel','normal');
+    F = scatteredInterpolant(xi,K);
+    K2 = F([log10(pum(:)), tauFold(:)]);
+    [K2,I] = sort(K2(:));
+
+    scatter(pum(I),tauFold(I),2,K2,'filled');
+    hold on;
+    colormap(clrsPT.sequential(1e3));
+    set(gca,'CLim',[0,0.7])
+
+    hold on;
+    set(gca,'xscale','log');
+    ylabel('\tau_1 (fold change)')
+    xlim([0.01,10])
+    xticks([0.01,0.1,1,10]);
+    xticklabels([0.01,0.1,1,10]);
+    ylim([0.5,3.5]);
+    line(get(gca,'xlim'),[1,1],'lineStyle','--','color','k')
+    plotPaperResults;
+    ylim([0,4.5])
 
 
 PP_test = linspace(0.01,100,1e3);
 confInt = predint(FT,PP_test);
 plot(PP_test,FT(PP_test)+1,'k','LineWidth',1,'LineStyle','--');
-% F = fill([sort(PP_test),fliplr(sort(PP_test))],1+[confInt(:,1);flipud(confInt(:,2))],'b','LineStyle','none','FaceAlpha',0.1)
 
 gcaformat(gcf);
-% end
 function [t,p,pum,tauFold,pBins,M] = marsh_model(ke0);
     if(nargin==0)
         ke0 = 1.21;
@@ -165,17 +94,12 @@ function [t,p,pum,tauFold,pBins,M] = marsh_model(ke0);
     B = [1/V1;0;0;0];
 
     load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\data_time_information.mat');
-    load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\data_fitted_params_rescaled_time.mat')
     timeInfo.infusion_onset(1) = timeInfo.object_drop(1)-200;
-    tau = squeeze(params(1,:,:))*1e3;
 
-    % load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\rescaled_20230701.mat')
-    % tau = squeeze(pars(:,1,:))*1e3;
-    % tRescaled =  linspace(-1.5,0.5,200);
-
-    fits = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230701\param_save.mat');
+    fits = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled\electrode2_Cz.mat');
     tau = squeeze(fits.pars(:,1,:))*1e3;
 
+    tRescaled = linspace(-1.5,0.5,200);
     pVec2 = zeros(length(tRescaled),14);
     for j = 1:14
         dt = 1e-3;
@@ -186,7 +110,6 @@ function [t,p,pum,tauFold,pBins,M] = marsh_model(ke0);
         x = zeros(4,N);
         u = zeros(N,1);
         u(and(T>timeInfo.infusion_onset(j)/60,T<timeInfo.object_drop(j)/60)) = 1e3; % 1mg/kg/min
-
 
         for i = 1:N-1
             x(:,i+1) = x(:,i) + dt*(A*x(:,i) + B*u(i));
@@ -202,7 +125,7 @@ function [t,p,pum,tauFold,pBins,M] = marsh_model(ke0);
     tauSmooth = smoothdata(tau,'gaussian',0.01);
     tauSmooth(tauSmooth==0)=nan;
 
-    pBins = 10.^linspace(-3,max(pVec2(:)),100);
+    pBins = 10.^linspace(-3,12,100);
     dh = min(diff(pBins));
     pEdges = [pBins(1)-dh,pBins+dh/2];
 
@@ -234,18 +157,18 @@ function plotPaperResults()
 
     tauOrser = [19.4,29.6,44.5]/19.4;
     pOrser = [0,0.5,2];
-    plot(pOrser,tauOrser,'*','MarkerSize',5,'LineWidth',0.75,'color',clrs(1,:));
+    plot(pOrser,tauOrser,'*','MarkerSize',5,'LineWidth',0.75,'color','#0077b6');
 
     tauKita = [1,1.2,1.4,1.45,2];
     pKita = [0.1,0.3,1,3,10];
-    plot(pKita,tauKita,'*','MarkerSize',5,'LineWidth',0.75,'color',clrs(2,:));
+    plot(pKita,tauKita,'*','MarkerSize',5,'LineWidth',0.75,'color','#03045e');
 
 
     pWhittington2 = [0,0.5,1,2,5,10];
     tauWhittington2 = [17.5,17.5,19,22.5,50,75]/17.5;
-    plot(pWhittington2,tauWhittington2,'*','MarkerSize',5,'LineWidth',0.75,'color',clrs(3,:));
+    plot(pWhittington2,tauWhittington2,'*','MarkerSize',5,'LineWidth',0.75,'color','#00b4d8')
 
     pWhittington1 = [0,0.5,1,2,5,10];
     tauWhittington1 = [17.5,17.5,19,48,58,75]/17.5;
-    plot(pWhittington1,tauWhittington1,'*','MarkerSize',5,'LineWidth',0.75,'color',clrs(4,:));
+    plot(pWhittington1,tauWhittington1,'*','MarkerSize',5,'LineWidth',0.75,'color','#1338BE');
 end

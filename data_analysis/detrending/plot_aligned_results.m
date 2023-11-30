@@ -1,3 +1,9 @@
+% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\Cz_multitaper_aligned.mat')
+% aligned = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\aligned_time\electrode2_Cz.mat');
+% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\_ncomm\fits_rescaled_time.mat');
+load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled\electrode2_Cz.mat','pars');
+freq = 0.5:0.5:149.5;
+
 dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 load(fullfile(dataFolder,'data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
@@ -14,19 +20,9 @@ aligned.beta_pre = squeeze(nanmean(aligned.pre(betaIdx,:,:)));
 aligned.delta_pre = squeeze(nanmean(aligned.pre(deltaIdx,:,:)));
 
 for i = 1:14
-    % t1 = -rescaled.time*t0(i);
-    % aligned.alpha_pre(:,i) = interp1(t1,rescaled.alpha_pre(:,i),aligned.time,'linear');
-    % aligned.beta_pre(:,i) = interp1(t1,rescaled.beta_pre(:,i),aligned.time,'linear');
-    % aligned.delta_pre(:,i) = interp1(t1,rescaled.delta_pre(:,i),aligned.time,'linear');
-
-    % aligned.alpha_syn(:,i) = interp1(t1,rescaled.alpha_syn(:,i),aligned.time,'linear');
-    % aligned.beta_syn(:,i) = interp1(t1,rescaled.beta_syn(:,i),aligned.time,'linear');
-    % aligned.delta_syn(:,i) = interp1(t1,rescaled.delta_syn(:,i),aligned.time,'linear');
-
     aligned.delta_syn(:,i) = aligned.delta_syn(:,i)-nanmean(aligned.delta_syn(aligned.time<=t0(i),i));
     aligned.alpha_syn(:,i) = aligned.alpha_syn(:,i)-nanmean(aligned.alpha_syn(aligned.time<=t0(i),i));
     aligned.beta_syn(:,i) = aligned.beta_syn(:,i)-nanmean(aligned.beta_syn(aligned.time<=t0(i),i));
-
 
     aligned.delta_syn(:,i) = fillgaps(aligned.delta_syn(:,i),5e3);
     aligned.alpha_syn(:,i) = fillgaps(aligned.alpha_syn(:,i),1024);
@@ -43,15 +39,6 @@ aligned.delta_syn(:,3) = nan*aligned.delta_syn(:,3);
 blue = clrsPT.qualitative_CM.blue;
 clrs = clrsPT.lines(3);
 clrs(2:3,:) = flip(clrs(2:3,:));
-
-% figureNB(30,10);
-% for i = 1:14
-%     subplot(2,7,i);
-%     plot(aligned.time,aligned.delta_syn(:,i))
-%     line(get(gca,'xlim'),[0,0],'color','k')
-%     ylim([-10,10])
-% end
-
 
 aligned.alpha_pre = smoothdata(aligned.alpha_pre,'movmedian',40);
 aligned.beta_pre = smoothdata(aligned.beta_pre,'movmedian',40);
