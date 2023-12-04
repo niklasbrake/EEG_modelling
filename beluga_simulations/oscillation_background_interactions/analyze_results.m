@@ -1,8 +1,6 @@
 % addpath('/lustre04/scratch/nbrake/code/simulation_code');
 
 folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\peak_interactions';
-% folder = '/lustre04/scratch/nbrake/data/simulations/peak_interactions';
-% importData(folder);
 
 load(fullfile(folder,'analyzed_data.mat'))
 fid = fopen('C:\Users\brake\Documents\GitHub\EEG_modelling\simulation_code\mod_files\default_parameters.json');

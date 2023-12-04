@@ -51,7 +51,6 @@ int *readSpikeTrains(char *filename,int nWidth,int nHeight)
     int i = 0;
     int j = 0;
     while (fgets(line, 100000, stream))
-    // for (int i = 0; i<100; i++)
     {
         char *token;
         // First token should be e/i so ignore
@@ -67,7 +66,6 @@ int *readSpikeTrains(char *filename,int nWidth,int nHeight)
         }
         i++;
     }
-    // fprintf(errorFile,"%d,%d\n",sizeof(int) * nWidth*nHeight,nWidth*i+j);
     fclose(stream);
     fclose(errorFile);
 

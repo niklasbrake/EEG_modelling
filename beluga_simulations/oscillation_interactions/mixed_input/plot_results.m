@@ -100,16 +100,20 @@ gcaformat(gcf)
 
 %%%%%%% plot detrending figure
 p0 = [0.13,0.0025,0.2,-0.85];
-psd0_detrend = 10*(log10(psd0./psd0(1))-synFun(f,p0)');
+% psd0_detrend = 10*(log10(psd0./psd0(1))-synFun(f,p0)');
+psd0_detrend = psd0./psd0(1)-10.^synFun(f,p0)';
 
 p1 = [0.13,0.0025,0.25,-0.85];
-psd1_detrend = 10*(log10(psd1./psd1(1))-synFun(f,p1)');
+% psd1_detrend = 10*(log10(psd1./psd1(1))-synFun(f,p1)');
+psd1_detrend = psd1./psd1(1)-10.^synFun(f,p1)';
 
 p2 = [0.16,0.0025,0.22,-1.27];
-psd2_detrend = 10*(log10(psd2./psd2(1))-synFun(f,p2)');
+% psd2_detrend = 10*(log10(psd2./psd2(1))-synFun(f,p2)');
+psd2_detrend = psd2./psd2(1)-10.^synFun(f,p2)';
 
 p3 = [0.15,0.0025,0.25,-1.27];
-psd3_detrend = 10*(log10(psd3./psd3(1))-synFun(f,p3)');
+% psd3_detrend = 10*(log10(psd3./psd3(1))-synFun(f,p3)');
+psd3_detrend = psd3./psd3(1)-10.^synFun(f,p3)';
 
 
 figureNB(14.5,6.5);
