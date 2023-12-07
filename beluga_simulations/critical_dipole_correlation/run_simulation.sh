@@ -1,3 +1,5 @@
+# gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp
+
 cd /lustre04/scratch/nbrake/code/critical_dipole_correlation
 
 folder='/lustre04/scratch/nbrake/data/simulations/embed_branching_network/m=0.98'

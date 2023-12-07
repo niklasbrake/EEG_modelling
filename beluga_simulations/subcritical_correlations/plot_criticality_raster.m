@@ -1,8 +1,8 @@
-% folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\_archive\critical_embedding';
-% network = network_simulation_beluga(folder);
-% network = network.initialize_postsynaptic_network(2,[1,2]);
-% network.tmax = 50e3;
-load('E:\Research_Projects\004_Propofol\data\simulations\raw\test\connected_components\CC1\model.mat')
+folder = 'E:\Research_Projects\004_Propofol\data\simulations\raw\example_embedding';
+network = network_simulation_beluga(folder);
+network = network.initialize_postsynaptic_network(2,[1,2]);
+network.tmax = 50e3;
+% load('E:\Research_Projects\004_Propofol\data\simulations\raw\test\connected_components\CC1\model.mat')
 N = network.getsynapsecount;
 
 % Get synapse spikes times
@@ -10,16 +10,19 @@ cons = csvread(fullfile(network.postNetwork,'connections.csv'));
 [ids,ts,ei] = network.getprenetwork(network.spikingFile);
 [~,I] = sort(cons(:,3));
 cons = cons(I,:);
+% nullIDs = find(ids>N);
+% ids(nullIDs) = [];
+% ts(nullIDs) = [];
+for i = 1:30e3
+    if(sum(cons(:,3)==i)==0)
+        idcs = find(ids==i);
+        ids(idcs) = [];
+        ts(idcs) = [];
+    end
+end
 
 % Get synapse locations
-mTypeSegmentationData = fullfile(network_simulation_beluga.resourceFolder,'cortical_column_Hagen','morphology_segmentations.mat');
-load(mTypeSegmentationData)
-for i = 1:length(network.neurons)
-    mData{i} = nrnSegs.(network.neurons(i).mType);
-    mData{i}.pos = [mean(mData{i}.x,2), ...
-    mean(mData{i}.y,2), ...
-    mean(mData{i}.z,2)];
-end
+mData = network.getmData;
 P = arrayfun(@(i,j) mData{i}.pos(j,:),cons(:,1),cons(:,2),'UniformOutput',false);
 P = cat(1,P{:});
 [thet,phi] = cart2sph(P(:,1),P(:,2),P(:,3));
@@ -31,7 +34,7 @@ D = network_simulation_beluga.haversine_distance2([phi(idx),thet(idx)],[phi,thet
 [~,I] = sort(J);
 ids = I(ids);
 
-raster(ids,ts);
+% raster(ids,ts);
 
 idcs = find(nrnID(ids)==1);
 ids1 = ids(idcs);

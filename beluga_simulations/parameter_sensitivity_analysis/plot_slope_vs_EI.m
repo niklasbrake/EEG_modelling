@@ -1,7 +1,7 @@
 % load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis\analyzed_results_all.mat')
 % load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis\fitted_spectra.mat')
 load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\fitted_spectra.mat')
-load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\parameter_sensitivity_analysis2.mat')
+% load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\parameter_sensitivity_analysis2.mat')
 
 % Define distributions of parameters
 lambda_E = @(p) cdf('logn',p,log(0.5),1);
@@ -281,35 +281,10 @@ figureNB(2.5,3);
     plot(f,10.^oof_1_40(i,1)./f.^oof_1_40(i,2),'color','r','LineWidth',1)
     set(gca,'xscale','log')
     set(gca,'yscale','log')
-    xlim([1,40])
     ylabel(['PSD (' char(956) 'V^2/Hz)']);;
     xlabel('Frequency (Hz)');
+    xlim([1,40])
     xticks([1,40])
+    xticklabels([1,40])
+    ylim(10.^[-16,-15]);
     gcaformat
-
-
-EI = pars(2,:)./pars(1,:);
-K = linspace(log10(min(EI)),log10(max(EI)),300);
-b0 = 0.5*(K(2:end)+K(1:end-1));
-h = histcounts(log10(EI),K);
-
-K0 = quantile(EI,linspace(0,1,6));
-
-clrs = clrsPT.sequential(10); clrs(1:5,:) = [];
-figureNB;
-for i = 1:5
-    fill([b0,fliplr(b0)],max(h)*1.2*(i-1)+[h*0,fliplr(h)],'k','FaceAlpha',0.2,'EdgeColor','none');
-    hold on;
-
-    m0 = K0(i);
-    m1 = K0(i+1);
-    idcs = find(and(EI>=m0,EI<m1));
-    h1 = histcounts(log10(EI(idcs)),K);
-    fill([b0,fliplr(b0)],max(h)*1.2*(i-1)+[h1*0,fliplr(h1)],clrs(i,:),'EdgeColor','none');
-    xlim(log10([0.05,50]))
-    line(log10([0.05,50]),max(h)*1.2*(i-1).*[1,1],'color','k');
-end
-xticks([-1,0,1]);
-xticklabels({'10:1','1:1','1:10'});
-xlabel('E:I ratio');
-set(get(gca,'yaxis'),'visible','off')

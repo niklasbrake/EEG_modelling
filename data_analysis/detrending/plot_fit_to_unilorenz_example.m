@@ -38,7 +38,7 @@ subplot(1,2,1);
     gcaformat
 
 p1_eq6 = [32e-3,4e-3,-14,3.8];
-p1_eq5 = [32e-3,-11.5,2.2];
+p1_eq5 = [32e-3,-1,2.2];
 subplot(1,2,2);
     idcs = find(and(aligned.time>-10,aligned.time<0));
     y = nanmedian(aligned.psd(:,idcs,i),2);
@@ -58,6 +58,8 @@ subplot(1,2,2);
     yticks(10.^[-2:2:4]);
     ylabel(['PSD (' char(956) 'V^2/Hz)']);
     gcaformat
+
+
 
 
 

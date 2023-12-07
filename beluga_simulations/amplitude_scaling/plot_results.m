@@ -1,9 +1,3 @@
-% function figure2(dataFolder)
-
-% if(nargin<1)
-%     error('Path to data required as input argument. Data can be downloaded from link in README file.');
-% end
-dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
 psd = [];
 % Get surface area of each triangle
 [sa,X] = network_simulation_beluga.getHeadModel;
@@ -91,8 +85,8 @@ ax = axes('Position',[0.11,0.515,0.4,0.5]);
     x4 = x3(:) + R*(e1*cos(-pi/2)+e2*sin(-pi/2));
     x = [x1,x2,x3,x4];
     P = patch(x(1,:),x(2,:),x(3,:),'b','LineWidth',1,'FaceColor','none');
+    set(ax,'CLim',[0,1]);
     colormap(ax,clrsPT.sequential(100))
-    set(gca,'CLim',[0,1]);
 ax = axes('Position',[0.455,0.64,0.3,0.3]);
     plot_mesh_brain(X3);
     d = vecnorm(X3.vertices,2,2);
@@ -134,31 +128,25 @@ rho_bar = sum(corr_kernel(dMids).*nrnCount)/sum(nrnCount');
 SIG_N = @(rho) N+N*(N-1)*rho;
 
 % Get baseline EEG spectrum from propofol cohort
-load(fullfile(dataFolder,'data_time_information.mat'));
-t0 = timeInfo.infusion_onset-timeInfo.object_drop;
-load(fullfile(dataFolder,'data_Cz_multitaper_meanRef.mat'));
-for i = 1:14
-    pre(:,i) = nanmedian(psd(:,and(time>=t0(i)-10,time<t0(i)),i),2);
-end
+data = load(fullfile(dataFolder,'electrode2_Cz.mat'));
+data.baseline = squeeze(nanmedian(data.psd(:,data.tRescaled<-1,:),2));
 
 % Get simulated passive spectrum
-% load(fullfile(dataFolder,'simulation_passive_spectra.mat'));
-% asynchUnitarySpec = mean(mean(P(:,:,:),3),2);
-% SIG0 = sum(asynchUnitarySpec*mean(diff(f)));
-% P0 = interp1(f,asynchUnitarySpec,freq);
+model = load(fullfile(dataFolder,'simulated_spectra_parameter_sensitivity.mat'));
+asynchUnitarySpec = mean(model.psd(:,:,:),2);
+SIG0 = sum(asynchUnitarySpec*mean(diff(model.f)));
+P0 = interp1(model.f,asynchUnitarySpec,data.freq);
 
-modelPSD = load('E:\Research_Projects\004_Propofol\data\simulations\raw\parameter_sensitivity_analysis2\fitted_spectra.mat')
-asynchUnitarySpec = mean(modelPSD.psd(:,:,:),2);
-SIG0 = sum(asynchUnitarySpec*mean(diff(modelPSD.f)));
-P0 = interp1(modelPSD.f,asynchUnitarySpec,freq);
+A1 = 30;
+A2 = 200;
 
 % Plot
 red = [0.8000    0.2980    0.0078];
 red = [0,0,0];
 ax = axes('Position',[0.18 0.15 0.23 0.23*8.5/6]);
-    plotwitherror(freq,pre,'M','color',[0.6,0.6,0.6],'LineWidth',1);
-    plot(freq,P0*50/SIG0,'color',red,'LineWidth',1)
-    plot(freq,P0*200/SIG0,'color',red,'LineWidth',1)
+    plotwitherror(data.freq,data.baseline,'M','LineWidth',1,'color',[0.6,0.6,0.6]);
+    plot(data.freq,P0*A1/SIG0,'color',red,'LineWidth',1)
+    plot(data.freq,P0*A2/SIG0,'color',red,'LineWidth',1)
     % plot(freq,(P0*100/SIG0+P0*100/SIG0)/2,'b','LineWidth',1)
     set(gca,'xscale','log');
     set(gca,'yscale','log');
@@ -188,7 +176,7 @@ ax = axes('Position',[0.55 0.15 0.23 0.23*8.5/6]);
     line([0,0],[0,10],[0,0],'color','k','LineWidth',0.75)
     view([0,90]);
     hold on;
-    C = contour(XX,YY,log10(tt),log10([50,200]),'color','k','linewidth',1);
+    C = contour(XX,YY,log10(tt),log10([A1,A2]),'color','k','linewidth',1);
     C1 = C(:,2:C(2,1)+1);
     C2 = C(:,C(2,1)+3:end);
     % P = patch([C1(1,:),fliplr(C2(1,:))],[C1(2,:),fliplr(C2(2,:))],'b','LineStyle','none');
@@ -215,9 +203,9 @@ ax = axes('Position',[0.55 0.15 0.23 0.23*8.5/6]);
     CM = clrsPT.diverging(1e3);
     c = linspace(0,3,1e3);
     t = linspace(-1,1,1e3);
-    cScale = (c-log10(125)).*(c<log10(50))./(log10(125))+(c-log10(125)).*(c>log10(200))./(3-log10(125));
-    % cScale = (c-log10(50))./(0.05-(c-log10(50))).*(c<log10(50)) + ...
-     % (c-log10(200))./(0.05+(c-log10(200))).*(c>log10(200));
+    cScale = (c-log10(125)).*(c<log10(A1))./(log10(125))+(c-log10(125)).*(c>log10(A2))./(3-log10(125));
+    % cScale = (c-log10(A1))./(0.05-(c-log10(A1))).*(c<log10(A1)) + ...
+     % (c-log10(A2))./(0.05+(c-log10(200))).*(c>log10(200));
 
     CM2 = interp1(t,CM,cScale);
     colormap(ax,CM2)
@@ -252,11 +240,11 @@ figureNB;
     end
     set(gca,'xscale','log')
     set(gca,'yscale','log')
-    line(get(gca,'xlim'),[50,50],'color','k','LineStyle','--','LineWidth',1);
-    line(get(gca,'xlim'),[200,200],'color','k','LineStyle','--','LineWidth',1);
+    line(get(gca,'xlim'),[A1,A1],'color','k','LineStyle','--','LineWidth',1);
+    line(get(gca,'xlim'),[A2,A2],'color','k','LineStyle','--','LineWidth',1);
     ylabel(['Total EEG power (' char(956) 'V^2)'])
     xlabel('\rho_{max}')
-    rho1 = interp1(tt(idcs(1),:),t,200)
-    rho2 = interp1(tt(idcs(2),:),t,200)
-    plot(rho1,200,'.k','MarkerSize',20);
-    plot(rho2,200,'.k','MarkerSize',20);
+    rho1 = interp1(tt(idcs(1),:),t,A2)
+    rho2 = interp1(tt(idcs(2),:),t,A2)
+    plot(rho1,A2,'.k','MarkerSize',20);
+    plot(rho2,A2,'.k','MarkerSize',20);

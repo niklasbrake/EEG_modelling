@@ -138,21 +138,10 @@ for i = 1:length(F)
     psd(:,:,i) = P/2;
 end
 
-
-dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
-load(fullfile(dataFolder,'data_time_information.mat'))
-t0 = timeInfo.infusion_onset-timeInfo.object_drop;
-data = load(fullfile(dataFolder,'data_Cz_multitaper_meanRef.mat'));
-pre = [];
-post = [];
-for i = 1:length(t0)
-    pre(:,i) = nanmedian(data.psd(:,data.time<t0(i),i),2);
-    post(:,i) = nanmedian(data.psd(:,data.time>0,i),2);
-end
-freq = data.freq;
-pre(and(freq>55,freq<65),:) = nan;
-post(and(freq>55,freq<65),:) = nan;
-
+dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Nature Communications\_final_submission\_data'
+% Get baseline EEG spectrum from propofol cohort
+data = load(fullfile(dataFolder,'electrode2_Cz.mat'));
+data.baseline = squeeze(nanmedian(data.psd(:,data.tRescaled<-1,:),2));
 
 load(fullfile(dataFolder,'anatomy_cortical_pairwise_distance_distribution.mat'));
 signed_area = A;
@@ -183,10 +172,8 @@ subplot(2,2,3);
     ylabel(['PSD (' char(956) 'V^2/Hz)']);
     xlabel('Frequency (Hz)')
     xlim([0.5,100]);
-    % ylim(10.^[-17,-13])
-    % yticks(10.^[-16,-14]);
-    ylim(10.^[-16,-13])
-    % yticks(10.^[-6:2:2])
+    ylim(10.^[-16.5,-13.5])
+    yticks(10.^[-16,-15,-14])
     xticks([1,10,100]);
     xticklabels([1,10,100]);
     set(gca,'xscale','log')
@@ -194,13 +181,12 @@ subplot(2,2,3);
     gcaformat;
 
 
-% rho_max = 0.0546;
-rho_max = 0.0748;
+rho_max = 0.02;
 scaling_factor = rho_max/M_S1(end-1);
 interp1(M_Sub,S,rho_max,'linear')
 
 subplot(2,2,4);
-    plotwitherror(freq(freq<100),pre(freq<100,:),'M','color',[0.5,0.5,0.5]);
+    plotwitherror(data.freq,data.baseline,'M','color',[0.5,0.5,0.5]);
     h=[];
     for i = 1:length(m)
         y = psd(:,:,i);
@@ -210,7 +196,7 @@ subplot(2,2,4);
     ylabel(['PSD (' char(956) 'V^2/Hz)']);
     xlabel('Frequency (Hz)')
     xlim([0.5,100]);
-    ylim(10.^[-1,2])
+    ylim(10.^[-2,2])
     xticks([1,10,100]);
     xticklabels([1,10,100]);
     set(gca,'xscale','log')

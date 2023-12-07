@@ -8,47 +8,6 @@ psd1 = mean(P2(:,:,4),2);
 psd2 = mean(P2(:,:,2),2);
 psd3 = mean(P2(:,:,3),2);
 
-figureNB(9,3)
-subplot(1,3,1);
-    plotwitherror(f,psd1,'CI','LineWidth',1,'color','b');
-    hold on;
-    plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
-    set(gca,'xscale','log');
-    set(gca,'yscale','log');
-    xlim([0.5,50]);
-    xticks([0.5,5,50]);
-    xlabel('Frequency (Hz)');
-    ylabel('log power');
-    yticks([]);
-    ylim(10.^[-16.5,-14])
-subplot(1,3,2);
-    plotwitherror(f,psd2,'CI','LineWidth',1,'color','r');
-    hold on;
-    plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
-    set(gca,'xscale','log');
-    set(gca,'yscale','log');
-    xlim([0.5,50]);
-    xticks([0.5,5,50]);
-    xlabel('Frequency (Hz)');
-    ylabel('log power');
-    yticks([]);
-    ylim(10.^[-16.5,-14])
-subplot(1,3,3);
-    plotwitherror(f,psd3,'CI','LineWidth',1,'color',[1,0,1]);
-    hold on;
-    plotwitherror(f,psd0,'CI','LineWidth',1,'color','k');
-    set(gca,'xscale','log');
-    set(gca,'yscale','log');
-    xlim([0.5,50]);
-    xticks([0.5,5,50]);
-    xlabel('Frequency (Hz)');
-    ylabel('log power');
-    yticks([]);
-    ylim(10.^[-16.5,-14])
-
-gcaformat(gcf)
-
-
 uni = load('E:\Research_Projects\004_Propofol\data\simulations\raw\trend_peak_interaction\trend_peak_interaction');
 
 psd00 = mean(uni.P2(:,:,1),2);
@@ -100,20 +59,20 @@ gcaformat(gcf)
 
 %%%%%%% plot detrending figure
 p0 = [0.13,0.0025,0.2,-0.85];
-% psd0_detrend = 10*(log10(psd0./psd0(1))-synFun(f,p0)');
-psd0_detrend = psd0./psd0(1)-10.^synFun(f,p0)';
+psd0_detrend = 10*(log10(psd0./psd0(1))-synFun(f,p0)');
+% psd0_detrend = psd0./psd0(1)-10.^synFun(f,p0)';
 
 p1 = [0.13,0.0025,0.25,-0.85];
-% psd1_detrend = 10*(log10(psd1./psd1(1))-synFun(f,p1)');
-psd1_detrend = psd1./psd1(1)-10.^synFun(f,p1)';
+psd1_detrend = 10*(log10(psd1./psd1(1))-synFun(f,p1)');
+% psd1_detrend = psd1./psd1(1)-10.^synFun(f,p1)';
 
 p2 = [0.16,0.0025,0.22,-1.27];
-% psd2_detrend = 10*(log10(psd2./psd2(1))-synFun(f,p2)');
-psd2_detrend = psd2./psd2(1)-10.^synFun(f,p2)';
+psd2_detrend = 10*(log10(psd2./psd2(1))-synFun(f,p2)');
+% psd2_detrend = psd2./psd2(1)-10.^synFun(f,p2)';
 
 p3 = [0.15,0.0025,0.25,-1.27];
-% psd3_detrend = 10*(log10(psd3./psd3(1))-synFun(f,p3)');
-psd3_detrend = psd3./psd3(1)-10.^synFun(f,p3)';
+psd3_detrend = 10*(log10(psd3./psd3(1))-synFun(f,p3)');
+% psd3_detrend = psd3./psd3(1)-10.^synFun(f,p3)';
 
 
 figureNB(14.5,6.5);

@@ -1,12 +1,14 @@
-elName = {'Fz', 'Cz', 'Pz', 'C3', 'C4', 'CP3', 'CP4'}
+elName = {'Fz', 'Cz', 'Pz', 'C3', 'C4', 'CP3', 'CP4'};
+saveFolder = 'E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled';
+
 figureNB(14,6);
 for i = 1:7
-    load(['E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\20230728_electrodes\rescaled_electrode' int2str(i) '.mat'])
+    load(fullfile(saveFolder,sprintf('electrode%d_%s.mat',i,elName{i})));
     subplot(2,4,i);
-    plotwitherror(rescaled.time,squeeze(rescaled.pars(1,:,:)*1e3),'CI','color','k');
-    xlim([-1.5,0.5]); ylim([0,80]);
+    plotwitherror(linspace(-1.5,0.5,200),squeeze(pars(:,1,:)*1e3),'CI','color','k');
+    xlim([-1.5,0.5]); ylim([10,75]);
     xlabel('Rescaled time');
-    ylabel('\tau_I (ms)')
+    ylabel('\tau_1 (ms)')
     title(elName{i})
     xticks([-1,0]);
     xticklabels({'Infusion','LOC'});

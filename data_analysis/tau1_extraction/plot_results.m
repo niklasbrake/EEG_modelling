@@ -28,7 +28,7 @@ black = CM(end,:);
 
 fig = figureNB(8.9,10);
 axes('Position',[0.067,0.76,0.91,0.2]);
-    plot(downsample(eeg_example.time,1),downsample(eeg_example.timedomain,1),'LineWidth',0.2,'color',black); hold on;
+    plot(downsample(eeg_example.time,50),downsample(eeg_example.timedomain,50),'LineWidth',0.2,'color',black); hold on;
     xlim([eeg_example.time(1)-10,eeg_example.time(end)]);
     ylim([-100,100]);
     line([eeg_example.time(1)-10,eeg_example.time(1)-10],[-25,25],'color','k','linewidth',1);

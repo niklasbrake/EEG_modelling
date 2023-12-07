@@ -27,7 +27,7 @@ for i = 1:10
         eeg(:,m*(k-1)+1:m*k) = network_simulation_beluga.getEEG(dp,sa,locations(k));
         G(m*(k-1)+1:m*k) = 1:m;
     end
-    psd = mypmtm(eeg,1e3,10);
+    [psd,f] = pmtm(eeg,2,[],1e3);
     Ptemp = splitapply(@(x) mean(x,2),psd,G);
     if(i==1)
         P = nan(size(psd,1),size(dipoles,3));

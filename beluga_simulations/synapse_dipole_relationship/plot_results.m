@@ -1,9 +1,3 @@
-function figure3b(dataFolder)
-
-if(nargin<1)
-    error('Path to data required as input argument. Data can be downloaded from link in README file.');
-end
-
 load(fullfile(dataFolder,'simulations_synapse_dipole_orientation.mat'));
 
 dMag = squeeze(max(vecnorm(dipoles,2,2)));
@@ -37,8 +31,6 @@ idcs = intersect(idcs,intersect(idcs1,idcs2));
 % Make data sparse for display purposes
 idcs = idcs(randperm(size(idcs,1),400));
 
-% fig = figureNB(5,2.75);
-% fig = figureNB(5.8,3.2);
 fig = figureNB(6.3,3.5);
 ax(1) = axes('Position',[0.16,0.3,0.3,0.55]);
 ax(2) = axes('Position',[0.6,0.3,0.3,0.55]);
@@ -46,7 +38,6 @@ for i = 1:2
     axes(ax(i));
     scatter(synapse_position_pol(idcs,i),PD_pol(idcs,i),dMag(idcs),'k','filled'); hold on;
     FT = fitlm(synapse_position_pol(idcs,i),PD_pol(idcs,i),'Weights',dMag(idcs))
-    % plot([-1,1],FT.predict([-1;1]),'color','k');    R2(i) = FT.Rsquared.Adjusted;
 end
 axes(ax(1));
     gcaformat;
@@ -57,7 +48,6 @@ axes(ax(1));
     xticklabels({['-' '\pi'],'0',['\pi']});
     yticklabels({['-' '\pi'],'0',['\pi']});
     line([-pi,pi],[-pi,pi],'color','r');
-    % text(-pi+0.4,pi+0.2,'Azimuth','FontSize',6,'HorizontalAlignment','left','VerticalAlignment','top')
 axes(ax(2));
     gcaformat;
     title('Elevation','FontSize',7,'FontWeight','normal');
@@ -68,9 +58,8 @@ axes(ax(2));
     xticklabels({['-' '\pi' '/2'],'0',['\pi' '/2']})
     yticklabels({['-' '\pi' '/2'],'0',['\pi' '/2']})
     line([-pi,pi]/2,[-pi,pi]/2,'color','r');
-    % text(-pi/2+0.2,pi/2+0.1,'Elevation','FontSize',6,'HorizontalAlignment','left','VerticalAlignment','top')
-gcaformat(fig);
 
+%{
 
 figureNB(3.5,2);
     plot(dipoles(:,:,2),'LineWidth',1,'color',[192/255,0,0]);
@@ -91,3 +80,5 @@ figureNB(4.2,3.8);
     set(gca,'DataAspectRatio',[1,1,1])
     axis off
 
+
+%}
