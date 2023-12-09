@@ -1,15 +1,31 @@
-% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\Cz_multitaper_aligned.mat')
-% aligned = load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\analyzed\aligned_time\electrode2_Cz.mat');
-% load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\_ncomm\fits_rescaled_time.mat');
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\electrodes_rescaled\electrode2_Cz.mat','pars');
-freq = 0.5:0.5:149.5;
-
-dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
-load(fullfile(dataFolder,'data_time_information.mat'));
+load(fullfile(dataFolder,'EEG_data','data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
+rescaled = load(fullfile(dataFolder,'EEG_data','electrode2_Cz_rescaled_time.mat'));
+rescaled.psd = log10(rescaled.psd);
 
-deltaIdx = find(and(freq>=0.5,freq<4));
+aligned = load(fullfile(dataFolder,'EEG_data','electrode2_Cz.mat'));
+
+load(fullfile(dataFolder,'EEG_data','Eq6_fits','electrode2_Cz.mat'),'pars');
+rescaled.synPars(1:4,:,:) = permute(pars(:,1:4,:),[2,1,3]);
+freq = rescaled.freq;
+
+[full_model,synFun] = fittingmodel('eq6');
+for i = 1:14
+    for j = 1:size(rescaled.psd,2)
+        synFit(:,j) = synFun(freq,rescaled.synPars(1:4,j,i));
+    end
+    rescaled.syn_detrended(:,:,i) = rescaled.psd(:,:,i)-synFit;
+
+    rescaled.pre(:,:,i) = rescaled.psd(:,:,i)-nanmedian(rescaled.psd(:,rescaled.time<-1,i),2);
+    rescaled.syn(:,:,i) = rescaled.syn_detrended(:,:,i)-nanmedian(rescaled.syn_detrended(:,rescaled.time<-1,i),2);
+
+    synFitAligned = interp1(-t0(i)*rescaled.time',synFit',aligned.time,'cubic')';
+    aligned.syn(:,:,i) = 10* (log10(aligned.psd(:,:,i)) - synFitAligned);
+    P0(:,i) = nanmean(aligned.syn(:,aligned.time<t0(i),i),2);
+end
+
+deltaIdx = find(and(freq>=1,freq<4));
 alphaIdx = find(and(freq>=8,freq<15));
 betaIdx = find(and(freq>=15,freq<30));
 aligned.alpha_syn = squeeze(nanmean(aligned.syn(alphaIdx,:,:)));
@@ -66,7 +82,7 @@ subplot(3,2,5);
     plotwitherror(aligned.time,aligned.delta_pre,'CI','LineWidth',1,'color',clrs(3,:));
     xlim([-240,60]);
     ylim([-3.5,13])
-    text(-220,13,'\delta (0.5-4 Hz)','FontSize',6,'color',clrs(3,:),'VerticalAlignment','top');
+    text(-220,13,'\delta (1-4 Hz)','FontSize',6,'color',clrs(3,:),'VerticalAlignment','top');
     ylabel('Power (dB)')
     line([-300,60],[0,0],'color','k');
 subplot(3,2,2);
@@ -89,3 +105,52 @@ subplot(3,2,6);
     ylim([-4,7])
 gcaformat(gcf)
 
+
+% Write to Source Data files
+% filename = 'E:\Research_Projects\004_Propofol\manuscript\Nature Communications\_final_submission\source_data.xlsx';
+% time = linspace(-0.5,1.5,200);
+% T = table(aligned.time(:));
+% T.Properties.VariableNames{1} = 'Time (aligned)';
+% writetable(T,filename,'Sheet','Figure S6d','Range','A2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.delta_pre(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','C2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.alpha_pre(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','R2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.beta_pre(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','AG2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.delta_syn(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','AV2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.alpha_syn(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','BK2')
+
+% T = table();
+% for i = 1:14
+%     T{:,i} = round(aligned.beta_syn(:,i),3,'significant');
+%     T.Properties.VariableNames{i} = sprintf('pt. %d',i);
+% end
+% writetable(T,filename,'Sheet','Figure S6d','Range','BZ2')

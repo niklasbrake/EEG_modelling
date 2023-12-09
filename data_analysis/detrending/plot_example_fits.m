@@ -1,24 +1,19 @@
 
-dataFolder = 'E:\Research_Projects\004_Propofol\manuscript\Version3\Data';
-
-load(fullfile(dataFolder,'data_time_information.mat'));
+load(fullfile(dataFolder,'EEG_data','data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
-psd = [];
-aligned = load(fullfile(dataFolder,'data_aligned_detrended.mat'));
-rescaled = load(fullfile(dataFolder,'data_rescaled_detrended.mat'));
+rescaled = load(fullfile(dataFolder,'EEG_data','electrode2_Cz_rescaled_time.mat'));
 freq = rescaled.freq;
-
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\model_fits\_ncomm\pre_post.mat','p1','p0');
-[full_model,synFun] = fittingmodel('exp2');
+load(fullfile(dataFolder,'EEG_data','Eq6_fits','electrode2_Cz_baseline_and_preLOC.mat'),'pars_baseline','pars_preLOC');
+[full_model,synFun] = fittingmodel('eq6');
 
 figureNB(21,4.3);
 for i = 1:14
     subplot(2,14,i);
-        y = 10.^nanmedian(rescaled.psd(:,rescaled.time<-1,i),2);
-        % y0 = 10.^synFun(freq,p0(:,i));
-        px = p0(:,i);
-        % [px,synFun,full_model] = synDetrend(freq(freq<100),y(freq<100),3,'exp2',pp);
+        y = nanmedian(rescaled.psd(:,rescaled.time<-1,i),2);
+        % y0 = 10.^synFun(freq,pars_baseline(:,i));
+        px = pars_baseline(:,i);
+        % [px,synFun,full_model] = synDetrend(freq(freq<100),y(freq<100),3,'eq6',pp);
         y0 = 10.^synFun(freq,px);
         plot(freq,y,'k','LineWidth',1); hold on;
         h0 = plot(freq,y0,'LineWidth',1,'color','b');  hold on
@@ -36,7 +31,7 @@ for i = 1:14
         xlabel('');
         xticklabels({});
         text(1,5e3,['Pt. ' int2str(i)],'FontSize',6)
-        text(0.7,5e-2,[num2str(p0(1,i)*1e3,3) ' ms'],'FontSize',6,'color','b')
+        text(0.7,5e-2,[num2str(pars_baseline(1,i)*1e3,3) ' ms'],'FontSize',6,'color','b')
         gcaformat
     subplot(2,14,i+14);
         h1 = plot(freq,10*log10(y./y0),'color','k','LineWidth',1);
@@ -62,15 +57,15 @@ for i = 1:14
     end
     drawnow;
     continue;;
-    fprintf('p = [%.3f,%.3f,%.3f,%.3f]\n',p0(1:4,i));
+    fprintf('p = [%.3f,%.3f,%.3f,%.3f]\n',pars_baseline(1:4,i));
     while(true)
-        x = input('p1 = ');
+        x = input('pars_preInfusion = ');
         if(~isnumeric(x))
             break;
         else
-            p0(1:4,i) = x(1:4);
-            h0.YData = 10.^synFun(freq,p0(:,i));
-            h1.YData = 10*log10(y./10.^synFun(freq,p0(:,i)));
+            pars_baseline(1:4,i) = x(1:4);
+            h0.YData = 10.^synFun(freq,pars_baseline(:,i));
+            h1.YData = 10*log10(y./10.^synFun(freq,pars_baseline(:,i)));
         end
     end
 end
@@ -80,9 +75,9 @@ figureNB(21,4.3);
 for i = 1:14
     subplot(2,14,i);
         idx = find(and(rescaled.time*-t0(i)>0-10,rescaled.time*-t0(i)<=0));
-        y = 10.^nanmedian(rescaled.psd(:,idx,i),2);
-        % y0 = 10.^synFun(freq,p1(:,i));
-        px = p1(:,i);
+        y = nanmedian(rescaled.psd(:,idx,i),2);
+        % y0 = 10.^synFun(freq,pars_preInfusion(:,i));
+        px = pars_preLOC(:,i);
         y0 = 10.^synFun(freq,px);
         plot(freq,y,'k','LineWidth',1); hold on;
         h0 = plot(freq,y0,'LineWidth',1,'color','b');  hold on
@@ -126,15 +121,15 @@ for i = 1:14
     end
     drawnow;
     continue;;
-    fprintf('p = [%.3f,%.3f,%.3f,%.3f]\n',p1(1:4,i));
+    fprintf('p = [%.3f,%.3f,%.3f,%.3f]\n',pars_preLOC(1:4,i));
     while(true)
-        x = input('p1 = ');
+        x = input('pars_preLOC = ');
         if(~isnumeric(x))
             break;
         else
-            p1(1:4,i) = x(1:4);
-            h0.YData = 10.^synFun(freq,p1(:,i));
-            h1.YData = 10*log10(y./10.^synFun(freq,p1(:,i)));
+            pars_preLOC(1:4,i) = x(1:4);
+            h0.YData = 10.^synFun(freq,pars_preLOC(:,i));
+            h1.YData = 10*log10(y./10.^synFun(freq,pars_preLOC(:,i)));
         end
     end
 end
@@ -184,7 +179,7 @@ for i = 1:5
     set(gca,'yscale','log')
     xlim([0.5,100]);
     ylim([1e-2,1e2]);
-    P(:,i) = synDetrend(freq(freq<100),psd(freq<100,i),2,'exp2',[0.015,4e-3,-10,4]);
+    P(:,i) = synDetrend(freq(freq<100),psd(freq<100,i),2,'eq6',[0.015,4e-3,-10,4]);
         hold on;
     plot(freq,10.^synFun(freq,P(:,i)),'LineWidth',1,'color','r')
     drawnow

@@ -1,8 +1,17 @@
-function figure8(dataFolder)
+function figureS7(dataFolder)
 
 if(nargin<1)
     error('Path to data required as input argument. Data can be downloaded from link in README file.');
 end
 
-% error('parameters need fixing');
-run('../data_analysis/tau1_extraction/other_electrode_plots.m')
+% Add paths for function execution
+myPath = mfilename('fullpath');
+basePath = fileparts(fileparts(myPath));
+addpath(fullfile(basePath,'auxiliary'));
+addpath(fullfile(basePath,'auxiliary','fmriView'));
+addpath(fullfile(basePath,'model'));
+addpath(fullfile(basePath,'data_analysis'));
+
+% Run subscripts for plotting results
+filePath = fullfile(basePath,'data_analysis','tau1_extraction');
+run(fullfile(filePath,'other_electrode_plots.m'));

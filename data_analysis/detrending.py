@@ -19,14 +19,6 @@ def readdata(filename):
     fs = np.array(fs)
     return fs, psd
 
-def read_initial(filename):
-    pars00 = list()
-    with open(filename, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            pars00.append(list(map(float,row)))
-    return pars00
-
 def savedata(data,filename):
     with open(filename,'w',newline='') as csvfile:
         wrt = csv.writer(csvfile, delimiter=',')
@@ -53,6 +45,19 @@ def eq1(fScaled, *params):
     ys = ys + np.log10(x2)
     return ys
 
+def full_model_eq1(xs,*params):
+    return eq1(scaleFrequency(xs),params[0][:4]) + spectral_peaks(xs,params[0][4:])
+
+
+def eq5(fScaled, *params):
+    tau1, offset, mag = params[0]
+    ys = np.zeros_like(fScaled)
+    ys = ys + mag + np.log10(np.exp(offset) + tau1*np.reciprocal(1+fScaled*tau1**2))
+    return ys
+
+def full_model_eq5(xs,*params):
+    return eq5(scaleFrequency(xs),params[0][:3]) + spectral_peaks(xs,params[0][3:])
+
 def eq6(fScaled, *params):
     tau1,tau2,offset,mag = params[0]
     tau2 = 4e-3;
@@ -61,11 +66,8 @@ def eq6(fScaled, *params):
     ys = ys + mag + np.log10(np.exp(offset)+x2);
     return ys
 
-def eq5(fScaled, *params):
-    tau1, offset, mag = params[0]
-    ys = np.zeros_like(fScaled)
-    ys = ys + mag + np.log10(np.exp(offset) + tau1*np.reciprocal(1+fScaled*tau1**2))
-    return ys
+def full_model_eq6(xs,*params):
+    return eq6(scaleFrequency(xs),params[0][:4]) + spectral_peaks(xs,params[0][4:])
 
 def spectral_peaks(xs, *params):
     ys = np.zeros_like(xs)
@@ -75,22 +77,13 @@ def spectral_peaks(xs, *params):
         ys = ys + hgt * np.exp(-(xs-ctr)**2 / (2*wid**2))
     return ys
 
-def full_model_eq6(xs,*params):
-    return eq6(scaleFrequency(xs),params[0][:4]) + spectral_peaks(xs,params[0][4:])
-
-def full_model_eq1(xs,*params):
-    return eq1(scaleFrequency(xs),params[0][:4]) + spectral_peaks(xs,params[0][4:])
-
-def full_model_unilorenz(xs,*params):
-    return eq5(scaleFrequency(xs),params[0][:3]) + spectral_peaks(xs,params[0][3:])
-
 def objective(params, model_func, data):
     xd, yd = data
     ym = model_func(xd,params)
     r = np.mean(np.abs(yd - ym))
     return r
 
-def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
+def main(f,p,nPeaks=3,fitType='eq6',sp_ap=list(),sp_p=list()):
 
     # Periodic parameter bounds, assuming the following peaks
     #   Peak 1: delta rhythm
@@ -102,39 +95,31 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
     ub_p = ub_p[:3*nPeaks]
 
     # Aperiodic parameter bounds
-    if(fitType=='exp2'):
+    if(fitType=='eq6'):
         lb_ap = [7e-3,3.9e-3,-21,1]
         ub_ap = [75e-3,4.1e-3,-7,5]
-        scale_ap = [5e-3,1e-3]
         full_model = full_model_eq6
         model_func = eq6
-        emergent_power = spectral_peaks
-        ratio0 = -11.5
-        K=4
-    elif(fitType=='lorenz'):
+    elif(fitType=='eq1'):
         lb_ap = [4e-3,1e-3,-3,-3]
         ub_ap = [75e-3,20e-3,1,5]
         full_model = full_model_eq1
         model_func = eq1
-        emergent_power = spectral_peaks
-        ratio0 = 0
-        K=4
-    elif(fitType=='unilorenz'):
+    elif(fitType=='eq5'):
         lb_ap = [7e-3,-20,1]
         ub_ap = [75e-3,0,5]
-        full_model = full_model_unilorenz
+        full_model = full_model_eq5
         model_func = eq5
-        emergent_power = spectral_peaks
-        ratio0 = 0
-        K=3
+
+    K = len(lb_ap)
 
     startpoint = sp_ap
     if(len(sp_ap)==0):
         if(fitType=='eq5'):
             sp_ap = [17e-3,-10.5,4.2]
-        elif(fitType=='exp2'):
+        elif(fitType=='eq6'):
             sp_ap = [17e-3,4e-3,-10.5,4.2]
-        elif(fitType=='lorenz'):
+        elif(fitType=='eq1'):
             sp_ap = [20e-3,3e-3,0,2]
         sp_p = [0.5,2,1.5,8,0.3,1,22,0.1,4,4,0,1]
         startpoint = sp_ap + sp_p[:3*nPeaks]
@@ -149,18 +134,20 @@ def main(f,p,nPeaks=3,fitType='exp2',sp_ap=list(),sp_p=list()):
     # Get initial parameter values by fitting each component seperately
     [x_data,y_data] = preparedata(f,p)
 
-    # Use inital guess to fit all parameters simulteanously
     if len(y_data.shape)==1:
+        # Fit just aperiodic component
         results1 = sp.optimize.least_squares(objective,startpoint,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
         parsSave = results1.x
         if(nPeaks>0):
+            # Fit peaks, using results1 as initial conditions for aperiodic component
             yDentrended = y_data-model_func(scaleFrequency(x_data),results1.x[:K])
-            results2 = sp.optimize.least_squares(objective,results1.x[K:],bounds=(lb_p,ub_p),args = [emergent_power,[x_data, yDentrended]])
+            results2 = sp.optimize.least_squares(objective,results1.x[K:],bounds=(lb_p,ub_p),args = [spectral_peaks,[x_data, yDentrended]])
 
             pars0 = np.concatenate((results1.x[:K],results2.x),0)
             results = sp.optimize.least_squares(objective,pars0,bounds=(lb,ub),args = [full_model,[x_data, y_data]])
             parsSave = results.x
     else:
+        # If input is a matrix, use fit to previous timepoint as initial condition
         results1 = sp.optimize.least_squares(objective,startpoint,bounds=(lb,ub),args = [full_model,[x_data, y_data[:,0]]])
         pars0 = results1.x
 

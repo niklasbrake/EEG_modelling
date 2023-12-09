@@ -13,6 +13,8 @@ All the MATLAB code was developed in MATLAB 2017b. Spectral exponent estimation 
 ## Acknowledgements
 I completed the work for this project in 2020-2021 during my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde. 
 
+gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp
+
 ## License
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
