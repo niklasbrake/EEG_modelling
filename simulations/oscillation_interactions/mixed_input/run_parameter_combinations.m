@@ -51,10 +51,9 @@ end
 function runSimulation(folder,pars,lamFun1,lamFun2)
     % Initialize network
     network = network_simulation_beluga(folder,pars);
-    gitTracker(folder,'Initialized simulation.');
 
     % Initialize post network
-    network = network.initialize_postsynaptic_network(10);
+    network = network.initialize_postsynaptic_network(1);
 
     % Presyanptic network parameters
     network.tmax = 10e3; % 2 seconds

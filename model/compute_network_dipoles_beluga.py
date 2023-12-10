@@ -78,7 +78,7 @@ def main(parameters,connection_data,preEI,preSpikes,savePath,T_MAX):
 
         # Simulate
         cdm = LFPy.CurrentDipoleMoment(cell=cell)
-        cell.simulate(probes=[cdm],rec_somav=True,rec_vmem=True)
+        cell.simulate(probes=[cdm],rec_somav=True)
 
         t = cell.tvec.reshape([-1,1])
         v = cell.somav.reshape([-1,1])

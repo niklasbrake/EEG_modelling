@@ -14,4 +14,5 @@ addpath(fullfile(basePath,'data_analysis'));
 
 % Run subscripts for plotting results
 filePath = fullfile(basePath,'data_analysis','detrending');
+run(fullfile(filePath,'plot_example_fits'));
 run(fullfile(filePath,'plot_aligned_results'));

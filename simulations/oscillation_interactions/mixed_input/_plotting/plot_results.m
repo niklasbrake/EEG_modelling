@@ -8,7 +8,7 @@ psd1 = mean(P2(:,:,4),2);
 psd2 = mean(P2(:,:,2),2);
 psd3 = mean(P2(:,:,3),2);
 
-uni = load(fullfile(dataFolder,'simulations','trend_peak_interactions','parameter_changes'));
+uni = load(fullfile(dataFolder,'simulations','trend_peak_interactions','parameter_changes_examples'));
 
 psd00 = mean(uni.P2(:,:,1),2);
 psd11 = mean(uni.P2(:,:,6),2);
