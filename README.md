@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10359818.svg)](https://doi.org/10.5281/zenodo.10359818)
+
 ## Executing code in this repository
 
 To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990.v2. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
