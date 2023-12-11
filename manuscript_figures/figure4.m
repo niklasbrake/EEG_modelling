@@ -15,4 +15,5 @@ addpath(fullfile(basePath,'data_analysis'));
 % Run subscripts for plotting results
 filePath = fullfile(basePath,'simulations','critical_dipole_correlation','_plotting');
 run(fullfile(filePath,'plot_results.m'));
+run(fullfile(filePath,'plot_example_raster.m'));
 

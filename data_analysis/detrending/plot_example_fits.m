@@ -1,4 +1,3 @@
-
 load(fullfile(dataFolder,'EEG_data','data_time_information.mat'));
 t0 = timeInfo.infusion_onset-timeInfo.object_drop;
 
@@ -135,17 +134,10 @@ for i = 1:14
 end
 
 
-load('E:\Research_Projects\004_Propofol\data\experiments\scalp_EEG\raw\time_series_all_channels.mat')
-
-pt = 13;
-t0 = -113;
-idcs = find(and(Time>t0,Time<=t0+10));
-t = Time(idcs);
-Y = TimeDomainAligned(idcs,2,pt);
-
+load(fullfile(dataFolder,'EEG_data','example_timeseries2.mat'));
 [b,a] = butter(7,55/1024*2,'low');
-
 [freq,time,psd] = eegfft(t,Y,2,0);
+t0 = -113;
 
 psd(and(freq>55,freq<65),:) = nan;
 for i = 1:size(psd,2)
@@ -158,7 +150,6 @@ figureNB(12,6);
 subplot(2,1,1);
     plot(t,filtfilt(b,a,Y),'color','k')
     hold on;
-    % plot(t,filtfilt(b,a,Y),'r','LineWidth',2)
     ylim([-50,60]);
     xlim([t0,t0+10]);
     xlabel('LOC-aligned time (s)')
@@ -183,10 +174,6 @@ for i = 1:5
         hold on;
     plot(freq,10.^synFun(freq,P(:,i)),'LineWidth',1,'color','r')
     drawnow
-    % xax = get(gca,'xaxis');
-    % xax.Color = 'r';
-    % yax = get(gca,'yaxis');
-    % yax.Color = 'r';
     xlabel('Frequency (Hz)');
     set(gca,'FontSize',7)
     gcaformat;
@@ -199,22 +186,3 @@ for i = 1:5
         ylabel(['PSD (' char(956) 'V^2/Hz)']);
     end
 end
-%{
-
-tcov = linspace(0,0.300,1e3);
-ecov = exp(-tcov/mean(P(1,:)))-exp(-tcov/mean(P(2,:)));
-ecov = ecov/sum(ecov);
-
-dt = 1e-3;
-tcov = 0:dt:0.2;
-ecov = exp(-tcov/mean(P(1,:)))-exp(-tcov/mean(P(2,:)));
-ecov = ecov/sum(ecov);
-N = randn(10/dt,1);
-
-
-t0 = dt*(1:length(N))';
-Yp = filter(b,a,60*(filter(ecov,1,N)+0.1*randn(size(N))+0.2*sin(2*pi*t0(:)*10)));
-subplot(3,1,3);
-    plot(t0,Yp,'color','k');
-    ylim([-50,60]);
-%}
