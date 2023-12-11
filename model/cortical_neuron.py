@@ -43,8 +43,6 @@ class cortical_neuron():
             self.soma.insert('ikdT')
             self.soma.gkbar_ikdT = pars['gkbar'][mType]
             self.soma.ek = -80
-            # self.soma.insert('imZ')
-            # self.soma.gkbar_imZ = 5*1e-5
         self.soma.push()
         h.pt3dclear()
         i = 0
