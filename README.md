@@ -26,7 +26,7 @@ mknrndll
 The file EEG_modelling/data_analysis/detrending.py contains the code used to fit Eq. 1, 5, and 6 from the manuscript to EEG spectra. The upper and lower bounds for the various parameters were optimized for our data and may need to be adjusted. EEG_modelling/data_analysis/synDetrend.m is a wrapper to run this function from MATLAB. 
 
 ## Acknowledgements
-I completed this work during 2020-2023 as part of my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde.
+I completed this work as part of my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde and his team.
 
 ## License
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
