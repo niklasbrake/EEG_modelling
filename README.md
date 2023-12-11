@@ -3,7 +3,7 @@ In this repository is the code associated with the following paper:
 
 **Brake N, Duc F, Rokos A, Arseneau F, Shahiri S, Khadra A, and Plourde G (2021). "A neurophysiological basis for aperiodic EEG and the background spectral trend."** *****Submitted.*****
 
-This repository includes functions to generate all figures from the manuscript (EEG_modelling/manuscript_figures), as well as the original code used to simulate the model (EEG_modelling/simulations).
+This repository includes functions to generate all figures from the manuscript (EEG_modelling/manuscript_figures), as well as the original code used to simulate the model (EEG_modelling/simulations). To reference this code, please cite the article mentioned above.
 
 ## Executing code in this repository
 
@@ -31,4 +31,4 @@ I completed this work during 2020-2023 as part of my PhD under the supervision o
 ## License
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
-To reference this code, please cite the article mentioned above.
+For completeness, this repository includes fmriView, which was taken from the repository github.com/edden-gerber/ecog_fmri_visualization_matlab under BSD 2-Clause "Simplified" License. This license is retained in the subdirectory EEG_modelling/auxiliary/fmriView
