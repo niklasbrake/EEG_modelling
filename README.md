@@ -11,11 +11,11 @@ To reproduce the figures, data needs to be downloaded from https://doi.org/10.60
 
 If you wish to simulate dipoles, the script simulation_examples/example_embedding.m outlines how the model is simulated. To run this script, the file model/compute_tiling_correlation.c needs to be compiled, which can be accomplished with the following command:
 
-***gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp***
+#^ ***gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp***
 
 Furthermore, the python packages in requirements.txt need to be installed, which can be accomplished with the following command:
 
-***pip install -r requirements.txt***
+#^ ***pip install -r requirements.txt***
 
 ## Acknowledgements
 I completed this work during 2020-2023 as part of my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde.
