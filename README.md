@@ -5,9 +5,6 @@ In this repository is the code associated with the following paper:
 
 This repository includes functions to generate all figures from the manuscript (EEG_modelling/manuscript_figures), as well as the original code used to simulate the model (EEG_modelling/simulations).
 
-## Detrending EEG spectra
-The file EEG_modelling/data_analysis/detrending.py contains the code used to fit Eq. 1, 5, and 6 from the manuscript to EEG spectra. The upper and lower bounds for the various parameters were optimized for our data and may need to be adjusted. EEG_modelling/data_analysis/synDetrend.m is a wrapper to run this function from MATLAB. 
-
 ## Executing code in this repository
 
 To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990.v2. Once this data is downloaded, line 16 of model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
@@ -24,6 +21,9 @@ Finally, the .MOD files need to be compiled for the neuron simulator. To do so, 
 ```
 mknrndll
 ```
+
+## Detrending EEG spectra
+The file EEG_modelling/data_analysis/detrending.py contains the code used to fit Eq. 1, 5, and 6 from the manuscript to EEG spectra. The upper and lower bounds for the various parameters were optimized for our data and may need to be adjusted. EEG_modelling/data_analysis/synDetrend.m is a wrapper to run this function from MATLAB. 
 
 ## Acknowledgements
 I completed this work during 2020-2023 as part of my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde.
