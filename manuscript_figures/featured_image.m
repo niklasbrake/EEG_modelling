@@ -9,6 +9,7 @@ load('E:\Research_Projects\004_Propofol\manuscript\Version3\Data\cortical_column
 
 M1 = 1200;
 M2 = 675;
+
 [X,Y] = meshgrid(linspace(-533.33,533.33,M1),linspace(-200,400,M2));
 pts = [X(:),Y(:),0*Y(:)];
 
@@ -29,7 +30,7 @@ for k = 1:size(pts,1);
 
     d(k) = sum(squeeze(sum(n1.dipoles(:,:,i0).*vn1,2))./r1.^2)+sum(squeeze(sum(n2.dipoles(:,:,i0).*vn2,2))./r2.^2);
 end
-CM = [1,1,1;flipud(1-clrsPT.diverging(100))];
+CM = [1,1,1;flipud(1-clrsPT.diverging(1e3))];
 mData1 = nrnSegs.L23E_oi24rpy1;
 mData2 = nrnSegs.L23I_oi38lbc1;
 d = min(max(d,-1e-2),1e-2);
@@ -48,10 +49,8 @@ axes('Position',[0,0,1,1]);
     view([0,0])
     set(gca,'DataAspectRatio',[1,1,1]);
     hold on;
-    S = mesh(X,0*Y,Y,0*Y,'FaceAlpha',0.5,'FaceColor','interp','LineStyle','none');
+    S = mesh(X,10+0*Y,Y,0*Y,'FaceAlpha',0.5,'FaceColor','interp','LineStyle','none');
     S.CData = reshape(d,[M2,M1]);
-
-    print(gcf,'E:\Research_Projects\004_Propofol\manuscript\Version3\Figures\png\featured_image.bmp','-dbmp','-r600');
 
 function fig = render_neuron_morphology(mType,offset)
 
@@ -71,13 +70,18 @@ function fig = render_neuron_morphology(mType,offset)
         segs{i} = X(i,X(i,:)~=0);
     end
 
-    data(:,6) = max(data(:,6),0.5);
+    data(:,6) = max(data(:,6),1);
     xSoma = data(data(:,2)==1,3:6);
     data(:,3:5) = data(:,3:5)-mean(xSoma(:,1:3));
     xSoma(:,1:3) = xSoma(:,1:3)-mean(xSoma(:,1:3));
 
     data(:,3) = data(:,3)+offset;
     xSoma(:,1) = xSoma(:,1)+offset;
+    if(strcmp(mType,'L23I_oi38lbc1'))
+        data(1:20,6) = 0.5;
+        data(segs{30},6) = [5,3,2,1,1];
+    end
+
 
     gridSize = @(d) floor(d.^2./(3+d.^2)*18+3);
     % fig = figureNB(12,18);
@@ -114,9 +118,12 @@ function fig = render_neuron_morphology(mType,offset)
         drawnow;
     end
     N = gridSize(max(xSoma(:,end)));
-    [xSynapses{end+1},ei{end+1}] = render_segment(xSoma,N);
-    xSynapses = cat(1,xSynapses{:});
-    ei = cat(1,ei{:});
+    if(strcmp(mType,'L23I_oi38lbc1'))
+        xSoma2 = [xSoma(:,1),xSoma(:,3),xSoma(:,2),xSoma(:,4)];
+        [xSynapses{end+1},ei{end+1}] = render_segment(xSoma2,N);
+    else
+        [xSynapses{end+1},ei{end+1}] = render_segment(xSoma,N);
+    end
 end
 function [xSynapses,ei] = render_segment(xSegment,N)
     Xall = [];

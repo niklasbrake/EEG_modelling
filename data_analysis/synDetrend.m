@@ -25,7 +25,7 @@ function [params,synFun,full_model] = synDetrend(f,P,nPeaks,fitType,startPoint)
         P = P(:);
     end
     csvwrite(file0,[f,P]);
-    cmd = ['python ' pyFunction ' ' file0 ' ' fitType ' ' int2str(nPeaks) ' ' startPointsFile];
+    cmd = ['python3 ' pyFunction ' ' file0 ' ' fitType ' ' int2str(nPeaks) ' ' startPointsFile];
     [err,file] = system(cmd);
     if(err)
         error(file)

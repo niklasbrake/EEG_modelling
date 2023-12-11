@@ -70,13 +70,8 @@ axes('Position',[0.71,0.465,0.25,0.26]);
 load(fullfile(dataFolder,'EEG_data','Eq6_fits','electrode2_Cz_baseline_and_preLOC.mat'),'pars_preInfusion','pars_preLOC');
 
 [full_model,synFun] = fittingmodel;
-for i = 1:14
-    pSynPre(:,i) = 10.^synFun(freq,pars_preInfusion(:,i));
-    pSynPost(:,i) = 10.^synFun(freq,pars_preLOC(:,i));
-end
 
 ptIdx = 1;
-
 synPre = pars_preInfusion(:,ptIdx);
 synPost = pars_preLOC(:,ptIdx);
 

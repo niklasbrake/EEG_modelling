@@ -1,9 +1,8 @@
 load(fullfile(dataFolder,'simulations','trend_peak_interactions','parameter_changes'));
 f = 0.1:0.1:500;
 
-rhythms = load('E:\Research_Projects\004_Propofol\data\simulations\raw\peak_trend_sensitivity\rhythm_spectra.mat');
+rhythms = load(fullfile(dataFolder,'simulations','trend_peak_interactions','rhythm_spectra.mat'));
 rhythms.psd = rhythms.psd([1,5,3,4,2]);
-
 
 P3 = zeros(length(f),5,5);
 P3(:,:,1) = mean(P2(:,:,1:5),2);

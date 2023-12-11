@@ -3,7 +3,6 @@ import csv
 import numpy as np
 import scipy as sp
 from scipy import optimize
-import matplotlib.pyplot as plt
 import math
 
 def readdata(filename):

@@ -13,7 +13,6 @@ classdef network_simulation_beluga
     end
 
     properties (Constant)
-        % resourceFolder = '/lustre04/scratch/nbrake/resource_folder';
         resourceFolder = 'E:\Research_Projects\004_Propofol\manuscript\Nature Communications\_final_submission\_data';
         functionFolder = fileparts(mfilename('fullpath'));
     end
@@ -488,7 +487,7 @@ classdef network_simulation_beluga
         function obj = embed_presyanptic_neurons(obj)
             file1 = obj.getCorrelationFile;
             file2 = fullfile(obj.preNetwork,'UMAP_embedding.csv');
-            system(['python ' obj.embeddingFunction ' ' file1 ' ' file2]);
+            system(['python3 ' obj.embeddingFunction ' ' file1 ' ' file2]);
         end
 
         function save(obj,filename)
@@ -1048,7 +1047,7 @@ end
 function prints = pySimulate(params,pyFun)
     pyFun = char(pyFun);
     params = char(params);
-    [err,prints] = system(['python "' pyFun '" ' params]);
+    [err,prints] = system(['python3 "' pyFun '" ' params]);
     if(err)
         error(prints);
     end
