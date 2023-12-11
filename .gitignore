@@ -2,6 +2,7 @@
 *.exe
 _archive
 errors.txt
+temp_params.csv
 *.mlapp
 *.zip
 *.pyc

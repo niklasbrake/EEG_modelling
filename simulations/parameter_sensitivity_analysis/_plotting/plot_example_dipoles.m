@@ -1,5 +1,6 @@
 load(fullfile(dataFolder,'simulations','example_simulation','simulation','simulation_data.mat'))
 load(fullfile(dataFolder,'simulations','example_simulation','model.mat'))
+network = network.rebaseNetwork(fullfile(dataFolder,'simulations','example_simulation'));
 
 % Resample to 1KHz
 dp = resample(dipoles,1,16);

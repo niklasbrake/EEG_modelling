@@ -1,9 +1,7 @@
 n1 = load('E:\Research_Projects\004_Propofol\data\simulations\raw\example_embedding\simulation\L23E_oi24rpy1_multi_dipoles.mat')
-% n1.dipoles = n1.dipoles(:,:,25256);
 n1.x(:,1) = n1.x(:,1)-250;
 
 n2 = load('E:\Research_Projects\004_Propofol\data\simulations\raw\example_embedding\simulation\L23I_oi38lbc1_multi_dipoles.mat')
-% n2.dipoles = n2.dipoles(:,:,25256);
 n2.x(:,1) = n2.x(:,1)+250;
 
 
@@ -13,11 +11,6 @@ M1 = 1200;
 M2 = 675;
 [X,Y] = meshgrid(linspace(-533.33,533.33,M1),linspace(-200,400,M2));
 pts = [X(:),Y(:),0*Y(:)];
-
-% i0 = 11190
-% if(nargin<3)
-%     i0 = 13990;
-% end
 
 i0 = 25256;
 
@@ -45,12 +38,10 @@ figureNB(12,6.75);
 axes('Position',[0,0,1,1]);
     gcaformat_dark
     colormap(CM);
-    set(gca,'CLim',[-1.1e-2,1e-2]);
+    set(gca,'CLim',[-1.1e-2,1.1e-2]);
     hold on;
     render_neuron_morphology(1,-250);
     render_neuron_morphology(2,250);
-    % line(mData1.x'-250,mData1.y',mData1.z','color','w');
-    % line(mData2.x'+250,mData2.y',mData2.z','color','w');
     xlim([-533.33,533.33]);
     ylim([-200,400]);
     gcaformat_dark
@@ -60,12 +51,8 @@ axes('Position',[0,0,1,1]);
     S = mesh(X,0*Y,Y,0*Y,'FaceAlpha',0.5,'FaceColor','interp','LineStyle','none');
     S.CData = reshape(d,[M2,M1]);
 
+    print(gcf,'E:\Research_Projects\004_Propofol\manuscript\Version3\Figures\png\featured_image.bmp','-dbmp','-r600');
 
-    % S = mesh(X2,0*Y2,Y2,0*Y2,'FaceAlpha',0.5,'FaceColor','interp','LineStyle','none');
-    % S.CData = d2;
-
-
-% end
 function fig = render_neuron_morphology(mType,offset)
 
     mTypes ={'L23E_oi24rpy1';'L23I_oi38lbc1';'L4E_53rpy1';'L4E_j7_L4stellate';'L4I_oi26rbc1';'L5E_j4a';'L5E_oi15rpy4';'L5I_oi15rbc1';'L6E_51_2a_CNG';'L6E_oi15rpy4';'L6I_oi15rbc1'};
