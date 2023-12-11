@@ -9,7 +9,7 @@ This repository includes functions to generate all figures from the manuscript (
 
 To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990.v2. Once this data is downloaded, line 16 of model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
 
-If you wish to simulate dipoles, the script simulation_examples/example_embedding.m outlines how the model is simulated. To run this script, the file model/compute_tiling_correlation.c needs to be compiled, which can be accomplished with the following command:
+If you wish to simulate dipoles, the script simulation_examples/example_embedding.m outlines how the model can be simulated. To run this script, the file model/compute_tiling_correlation.c needs to be compiled, which can be accomplished with the following command:
 ````
 gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp
 ````
