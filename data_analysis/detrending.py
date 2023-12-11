@@ -88,6 +88,7 @@ def main(f,p,nPeaks=3,fitType='eq6',sp_ap=list(),sp_p=list()):
     #   Peak 1: delta rhythm
     #   Peak 2: alpha rhythm
     #   Peak 3: beta rhythm
+    # Parameter order is mean, height, and SD for each peak, sequentially.
     lb_p = [0,0,0.2,6,0,0.6,15,0,1,2,0,0.4]
     ub_p = [4,4,3,15,4,4,40,3,10,5,2,2]
     lb_p = lb_p[:3*nPeaks]
