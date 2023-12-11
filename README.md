@@ -3,7 +3,7 @@ In this repository is the code associated with the following paper:
 
 **Brake N, Duc F, Rokos A, Arseneau F, Shahiri S, Khadra A, and Plourde G (2021). "A neurophysiological basis for aperiodic EEG and the background spectral trend."** *****Submitted.*****
 
-This repository includes functions to generate all figures from the manuscript (under manuscript_figures), as well as the original code used to simulate the model (simulations).
+This repository includes functions to generate all figures from the manuscript (EEG_modelling/manuscript_figures), as well as the original code used to simulate the model (EEG_modelling/simulations).
 
 ## Executing code in this repository
 
