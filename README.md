@@ -13,10 +13,15 @@ If you wish to simulate dipoles, the script simulation_examples/example_embeddin
 ````
 gcc compute_tiling_correlation.c -o compute_tiling_correlation.exe -lm -fopenmp
 ````
-Furthermore, the python packages in requirements.txt need to be installed, which can be accomplished with the following command:
+The python packages in requirements.txt need to be installed, which can be accomplished with the following command:
 ````
 pip install -r requirements.txt
 ````
+Finally, the .MOD files need to be compiled for the neuron simulator. To do so, navigate to the folder EEG_modelling\model\mod_files and run the command
+```
+mknrndll
+```
+
 ## Acknowledgements
 I completed this work during 2020-2023 as part of my PhD under the supervision of [Dr. Anmar Khadra](http://www.medicine.mcgill.ca/physio/khadralab/) and in collaboration with Dr. Gilles Plourde at McGill Univeristy. The EEG data used in this project was collected by Dr. Plourde.
 
