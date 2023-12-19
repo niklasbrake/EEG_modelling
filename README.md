@@ -2,7 +2,7 @@
 
 ## Executing code in this repository
 
-To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990.v2. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
+To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
 
 If you wish to simulate dipoles, the script EEG_modelling/simulation_examples/example_embedding.m outlines how the model can be simulated. To run this script, the file EEG_modelling/model/compute_tiling_correlation.c needs to be compiled, which can be accomplished with the following command:
 ````
