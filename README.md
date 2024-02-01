@@ -1,13 +1,8 @@
-## What is this?
-In this repository is the code associated with the following paper:
-
-**Brake N, Duc F, Rokos A, Arseneau F, Shahiri S, Khadra A, and Plourde G. (2023). "A neurophysiological basis for aperiodic EEG and the background spectral trend.".**
-
-This repository includes functions to generate all figures from the manuscript (EEG_modelling/manuscript_figures), as well as the original code used to simulate the model (EEG_modelling/simulations). To reference this code, please cite the article mentioned above.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10359818.svg)](https://doi.org/10.5281/zenodo.10359818)
 
 ## Executing code in this repository
 
-To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990.v2. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
+To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
 
 If you wish to simulate dipoles, the script EEG_modelling/simulation_examples/example_embedding.m outlines how the model can be simulated. To run this script, the file EEG_modelling/model/compute_tiling_correlation.c needs to be compiled, which can be accomplished with the following command:
 ````
