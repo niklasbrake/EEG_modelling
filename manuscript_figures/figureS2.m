@@ -1,58 +1,200 @@
-function figureS2(dataFolder)
+function figureS3(dataFolder)
 
-    if(nargin<1)
-        error('Path to data required as input argument. Data can be downloaded from link in README file.');
-    end
+if(nargin<1)
+    error('Path to data required as input argument. Data can be downloaded from link in README file.');
+end
+
+% Add paths for function execution
+myPath = mfilename('fullpath');
+basePath = fileparts(fileparts(myPath));
+addpath(fullfile(basePath,'auxiliary'));
+addpath(fullfile(basePath,'model'));
+addpath(fullfile(basePath,'data_analysis'));
+
+% Run subscripts for plotting results
+
+load(fullfile(dataFolder,'simulations','simulated_spectra_parameter_sensitivity'));
+
+% Define distributions of parameters
+lambda_E = @(p) cdf('logn',p,log(0.5),1);
+lambda_I = @(p) cdf('logn',p,log(2.5),1);
+tauE = @(p) cdf('unif',p,1,3.5);
+tauI = @(p) cdf('unif',p,5,20);
+gE = @(p) cdf('unif',p,0.2e-3,2e-3);
+gI = @(p) cdf('unif',p,0.2e-3,2e-3);
+erev = @(p) cdf('unif',p,-75,-45);
+gleak = @(p) cdf('unif',log10(p),-5,log10(0.005));
+% Distribution of morphologies
+neuronTypes = {'L23E_oi24rpy1';'L23I_oi38lbc1';'L23I_oi38lbc1';'L4E_53rpy1';'L4E_j7_L4stellate';'L4E_j7_L4stellate';'L4I_oi26rbc1';'L4I_oi26rbc1';'L5E_oi15rpy4';'L5E_j4a';'L5I_oi15rbc1';'L5I_oi15rbc1';'L6E_51_2a_CNG';'L6E_oi15rpy4';'L6I_oi15rbc1';'L6I_oi15rbc1'};
+nrnAbundance = [26.8,3.2,4.3,9.5,9.5,9.5,5.6,1.5,4.9,1.3,0.6,0.8,14,4.6,1.9,1.9];
+mTypeCount = accumarray(findgroups(neuronTypes),nrnAbundance);
+mTypeP = cumsum(mTypeCount)/sum(mTypeCount);
+mType = @(p) interp1(mTypeP,1:11,p,'next','extrap');
+samplePars = @(P) [lambda_E(P(:,1)), lambda_I(P(:,2)), tauE(P(:,3)), ...
+tauI(P(:,4)), gE(P(:,5)), gI(P(:,6)), erev(P(:,7)), gleak(P(:,8)), mType(P(:,9))];
+P = samplePars(pars')';
 
 
-    load(fullfile(dataFolder,'simulations','synthetic_spikes','simulations_synapse_dipole_orientation.mat'));
+EI = pars(2,:)./pars(1,:);
+K = linspace(log10(min(EI)),log10(max(EI)),300);
+b0 = 0.5*(K(2:end)+K(1:end-1));
+h = histcounts(log10(EI),K);
 
-    dMag = squeeze(max(vecnorm(dipoles,2,2)));
-    dMag./max(dMag)*3;
+figureNB(7.3,10.5);
+subplot(3,2,1);
+    idcs = find(pars(8,:)>1e-3);
+    beta = oof_30_50(idcs,2);
+    EI = pars(2,idcs)./pars(1,idcs);
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    ylim([-1,4]);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    yl = ylabel('Slope (30-50 Hz)');
+    yl.Position(1) = 0.003;
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (\lambda_E:\lambda_I)')
+    txt1 = text(0.05,4,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L high','FontSize',7,'Fontweight','normal')
+    gcaformat;
+subplot(3,2,2);
+    idcs = find(pars(8,:)<1e-4);
+    beta = oof_30_50(idcs,2);
+    EI = pars(2,idcs)./pars(1,idcs);
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    ylim([-1,4]);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (\lambda_E:\lambda_I)')
+    txt2 = text(0.05,4,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L low','FontSize',7,'Fontweight','normal')
+    gcaformat;
 
-    dipole_moment = squeeze(nanmedian(dipoles./vecnorm(dipoles,2,2)))';
-    dipole_moment = [dipole_moment(:,1),dipole_moment(:,3),-dipole_moment(:,2)];
-    dipole_moment(find(E_or_I==0),:) = -dipole_moment(find(E_or_I==0),:);
 
-    clrs = [230, 25, 75;
-        60, 180, 75];
+subplot(3,2,3);
+    idcs = find(pars(8,:)>1e-3);
+    beta = oof_1_40(idcs,2);
+    EI = pars(6,idcs)./pars(5,idcs);
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    yl = ylabel('Slope (1-40 Hz)');
+    yl.Position(1) = 0.003;
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (g_E:g_I)')
+    ylim([-0.5,1.5])
+    txt1 = text(0.05,1.5,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L high','FontSize',7,'Fontweight','normal')
+    gcaformat;
+subplot(3,2,4);
+    idcs = find(pars(8,:)<1e-4);
+    beta = oof_1_40(idcs,2);
+    EI = pars(6,idcs)./pars(5,idcs);
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (g_E:g_I)')
+    ylim([-0.5,1.5])
+    txt2 = text(0.05,1.5,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L low','FontSize',7,'Fontweight','normal')
+    gcaformat;
 
-    [theta0,phi0] = cart2sph(synapse_position(:,1),synapse_position(:,2),synapse_position(:,3));
-    [theta1,phi1] = cart2sph(dipole_moment(:,1),dipole_moment(:,2),dipole_moment(:,3));
-    synapse_position_pol = [theta0,phi0];
-    PD_pol = [theta1,phi1];
+subplot(3,2,5);
+    idcs = find(pars(8,:)>1e-3);
+    beta = oof_30_50(idcs,2);
+    EI = pars(6,idcs)./pars(5,idcs);
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    ylim([-1,4]);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    yl = ylabel('Slope (30-50 Hz)');
+    yl.Position(1) = 0.003;
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (g_E:g_I)')
+    txt1 = text(0.05,4,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L high','FontSize',7,'Fontweight','normal')
+    gcaformat;
+subplot(3,2,6);
+    idcs = find(pars(8,:)<1e-4);
+    beta = oof_30_50(idcs,2);
+    EI = pars(6,idcs)./pars(5,idcs);;
+    h = plot(EI,beta,'.','color',[0,0,0],'MarkerSize',1);
+    ylim([-1,4]);
+    hold on
+    FT = fitlm(log10(EI),beta);
+    rho = corr(log10(EI)',beta);
+    R = FT.Rsquared.Adjusted;
+    p = FT.Coefficients{2,4};
+    fprintf('\\rho = %.2f, R^2 = %.2f, p=%.2e\n',rho,R,p);
+    t = 10.^linspace(-5,5,1e3)';
+    plot(t,FT.predict(log10(t)),'color','r','LineWidth',1);
+    set(gca,'xscale','log');
+    xlim([0.02,50])
+    xticks([0.1,1,10])
+    xticklabels({'10:1','1:1','1:10'})
+    xlabel('E:I ratio (g_E:g_I)')
+    txt2 = text(0.05,4,sprintf('\\rho = %.2f',corr(log10(EI)',beta)),'FontSize',7,'FontWeight','normal','Color','r','VerticalAlignment','top');
+    title('g_L low','FontSize',7,'Fontweight','normal')
+    gcaformat;
 
-    gIdcs = 1-E_or_I;
-    clrs = [0,0,1;1,0,0];
-    clrs = clrs(gIdcs+1,:);
 
-    mIDs = findgroups(mTypes);
-    mTypes = unique(mTypes);
+K0 = quantile(EI,linspace(0,1,6));
+figureNB;
+for i = 1:5
+    idcs1 = find(and(EI>K0(i),EI<K0(i+1)));
+    idcs2 = find(pars(8,:)<1e-4);
+    idcs3 = find(pars(8,:)>1e-3);
 
-    for j = 1:11
-        fig = figureNB(6,3);
-        for i = 1:2
-            subplot(1,2,i);
-            idcs = find(mIDs==j);
-            scatter(synapse_position_pol(idcs,i),PD_pol(idcs,i),dMag(idcs),'k','filled'); hold on;
-            FT = fitlm(synapse_position_pol(idcs,i),PD_pol(idcs,i),'Weights',dMag(idcs))
-        end
-        subplot(1,2,1);
-            gcaformat;
-            xlim([-pi,pi]); xticks([-pi,0,pi]);
-            ylim([-pi,pi]); yticks([-pi,0,pi]);
-            xticklabels({sprintf('%c%c',char(45),char(960)),'0',sprintf('%c',char(960))})
-            yticklabels({sprintf('%c%c',char(45),char(960)),'0',sprintf('%c',char(960))})
-            line([-pi,pi],[-pi,pi],'color','r');
-            text(pi,pi+0.3,strrep(mTypes{j},'_','\_'),'VerticalAlignment','bottom','FontSize',7,'FontWeight','bold')
-            axis square;
-        subplot(1,2,2);
-            gcaformat;
-            xlim([-pi,pi]/2); xticks([-pi/2,0,pi/2]);
-            ylim([-pi,pi]/2); yticks([-pi/2,0,pi/2]);
-            xticklabels({sprintf('%c%c/2',char(45),char(960)),'0',sprintf('%c/2',char(960))})
-            yticklabels({sprintf('%c%c/2',char(45),char(960)),'0',sprintf('%c/2',char(960))})
-            line([-pi,pi]/2,[-pi,pi]/2,'color','r');
-            axis square;
-    end
+    subplot(5,2,9-2*(i-1));
+        idcs = intersect(idcs1,idcs3);
+        histogram(V_soma(:,idcs),'EdgeColor','none','FaceColor','k');
+    subplot(5,2,10-2*(i-1));
+        idcs = intersect(idcs1,idcs2);
+        histogram(V_soma(:,idcs),'EdgeColor','none','FaceColor','k');
 end

@@ -26,14 +26,19 @@ red = [1,0,1]/1.5;
 fig = figure('color','w','units','centimeters');
 fig.Position(3:4) = [6.5,3.3];
 axes('Position',[0.0,-0.2,0.46,1.54]);
-    plot_mesh_brain(X);
+    trisurf(X.faces, X.vertices(:,1), X.vertices(:,2), X.vertices(:,3),...
+    'FaceLighting','gouraud','FaceVertexCData',0,'EdgeColor','none');
+    hold on
     plot3(X.vertices(idcs,1),X.vertices(idcs,2),X.vertices(idcs,3),'.k','MarkerSize',2);
     plot3(X.vertices(iExample(1),1),X.vertices(iExample(1),2),X.vertices(iExample(1),3),'.','color',blue,'MarkerSize',15);
     plot3(X.vertices(iExample(2),1),X.vertices(iExample(2),2),X.vertices(iExample(2),3),'.','color',red,'MarkerSize',15);
     plot3(sa.locs_3D(czIdx,1),sa.locs_3D(czIdx,2),sa.locs_3D(czIdx,3),'.k','MarkerSize',10);
     view([122,15]);
+    axis tight equal off
+    camlight headlight
+    material dull
     colormap(flip(gray(10)))
-    fix_lighting;
+    caxis([0,1]);
 
     L = drawline_3Dplot(x1(1:3),pi/4,30)
     L.Color = blue;

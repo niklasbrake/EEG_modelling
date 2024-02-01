@@ -30,5 +30,3 @@ I completed this work as part of my PhD under the supervision of [Dr. Anmar Khad
 
 ## License
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
-
-For completeness, this repository includes fmriView, which was taken from the GitHub repository [ecog_fmri_visualization_matlab](https://github.com/edden-gerber/ecog_fmri_visualization_matlab) under a BSD 2-Clause "Simplified" License. This license is retained in the subdirectory EEG_modelling/auxiliary/fmriView.

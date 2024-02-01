@@ -8,7 +8,6 @@ end
 myPath = mfilename('fullpath');
 basePath = fileparts(fileparts(myPath));
 addpath(fullfile(basePath,'auxiliary'));
-addpath(fullfile(basePath,'auxiliary','fmriView'));
 addpath(fullfile(basePath,'model'));
 addpath(fullfile(basePath,'data_analysis'));
 

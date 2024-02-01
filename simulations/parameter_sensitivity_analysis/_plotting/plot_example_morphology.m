@@ -1,14 +1,16 @@
 folder = fullfile(dataFolder,'cortical_column_Hagen','matlab_morph_data');
 
-load(fullfile(folder,'L23E_oi24rpy1_connections.mat'));
+% load(fullfile(folder,'L23E_oi24rpy1_connections.mat'));
+load(fullfile(folder,'L4E_j7_L4stellate_connections.mat'));
 connections = connections+1;
 
-X = csvread(fullfile(folder,'L23E_oi24rpy1_segments.csv'));
+% X = csvread(fullfile(folder,'L23E_oi24rpy1_segments.csv'));
+X = csvread(fullfile(folder,'L4E_j7_L4stellate_segments.csv'));
 for i=  1:size(X,1)
     segs{i} = X(i,X(i,:)~=0);
 end
 
-data(:,6) = max(data(:,6),0.5);
+data(:,6) = max(data(:,6),1);
 xSoma = data(data(:,2)==1,3:6);
 data(:,3:5) = data(:,3:5) - mean(xSoma(:,1:3));
 xSoma(:,1:3) = xSoma(:,1:3)-mean(xSoma(:,1:3));
@@ -23,6 +25,7 @@ set(gca,'DataAspectRatio',[1,1,1]);
 axis off;
 set(gca,'CLim',[-1,1]);
 colormap([1,0,0;0,0,0;0,0,1]);
+colormap([1,0,0;1,0,0;0,0,1]);
 
 xSynapses = cell(length(segs)+1,1);
 ei = cell(length(segs)+1,1);
@@ -53,7 +56,7 @@ N = gridSize(max(xSoma(:,end)));
 [xSynapses{end+1},ei{end+1}] = render_segment(xSoma,N);
 xSynapses = cat(1,xSynapses{:});
 ei = cat(1,ei{:});
-
+return;
 zl = get(gca,'zlim');
 xl = get(gca,'xlim');
 if(xl(1)>-100)
@@ -102,7 +105,7 @@ function [xSynapses,ei] = render_segment(xSegment,N)
 
     xSynapses= [];
     ei= [];
-
+    return;
     % Randomly distribute excitatory and inhibitory syanpses relative to surface area
     d = cumsum([0;vecnorm(diff([Xall(:,1),Yall(:,1),Zall(:,1)]),2,2)]);
 

@@ -158,12 +158,15 @@ X3.faces = F0;
 
 sigma = 10;
 ax(3) = axes('Position',[0.11,0.515,0.4,0.5]);
-    plot_mesh_brain(X);
     d = vecnorm(X.vertices-c0,2,2);
-    C = exp(-d.^2/sigma);
-    paint_mesh(C./max(C));
+    C = exp(-d.^2/sigma); C = C/max(C);
+    trisurf(X.faces, X.vertices(:,1), X.vertices(:,2), X.vertices(:,3),...
+    'FaceLighting','gouraud','FaceVertexCData',C,'EdgeColor','none','FaceColor','interp');
+    hold on
     view([120,10]);
-    fix_lighting;
+    axis tight equal off
+    camlight headlight
+    material dull
 
     VW = get(gca,'view');
     [a1,a2,a3] = sph2cart((VW(1)-90)*pi/180,VW(2)/180*pi,1);
@@ -181,10 +184,16 @@ ax(3) = axes('Position',[0.11,0.515,0.4,0.5]);
     set(ax(3),'CLim',[0,1]);
     colormap(ax(3),clrsPT.sequential(100))
 ax(4) = axes('Position',[0.455,0.64,0.3,0.3]);
-    plot_mesh_brain(X3);
     d = vecnorm(X3.vertices,2,2);
-    C = exp(-d.^2/sigma);
-    paint_mesh(C/max(C));
+    C = exp(-d.^2/sigma);  C = C/max(C);
+    trisurf(X3.faces, X3.vertices(:,1), X3.vertices(:,2), X3.vertices(:,3),...
+    'FaceLighting','gouraud','FaceVertexCData',C,'EdgeColor','none','FaceColor','interp');
+    hold on
+    view([0,0])
+    axis tight equal off
+    camlight headlight
+    material dull
+
     colormap(ax(4),clrsPT.sequential(100))
     set(gca,'CLim',[0,1]);
     yl = get(gca,'ylim');
