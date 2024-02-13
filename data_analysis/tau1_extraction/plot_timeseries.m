@@ -43,3 +43,11 @@ axes('Position',[0.067+0.91*a-0.02,0.69,0.01,0.05]);
     ylim(yl);
     yticks([0,1,2])
     gcaformat
+
+
+% % Write to Source Data file
+% filename = 'E:\Research_Projects\004_Propofol\manuscript\Nature Communications\_final_submission\source_data.xlsx';
+
+% T = table(time(:),eeg(:));
+% T.Properties.VariableNames = {'Time (s)','EEG (μV)'};
+% writetable(T,filename,'Sheet','Figure 8a','Range','B2')
