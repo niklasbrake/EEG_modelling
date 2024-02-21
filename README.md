@@ -1,5 +1,9 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10359817.svg)](https://doi.org/10.5281/zenodo.10359817)
 
+## Paper
+This code repository is associated with the following publication:
+Brake, N., Duc, F., Rokos, A. et al. A neurophysiological basis for aperiodic EEG and the background spectral trend. Nat Commun 15, 1514 (2024). https://doi.org/10.1038/s41467-024-45922-8
+
 ## Executing code in this repository
 
 To reproduce the figures, data needs to be downloaded from https://doi.org/10.6084/m9.figshare.24777990. Once this data is downloaded, line 16 of EEG_modelling/model/network_simulation_beluga.m needs to be updated, such that the variable resourceFolder points to the data folder.
