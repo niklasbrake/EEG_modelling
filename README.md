@@ -3,7 +3,7 @@
 ## Paper
 This code repository is associated with the following publication:
 
-Brake et al. A neurophysiological basis for aperiodic EEG and the background spectral trend. *Nat Commun* **15**, 1514 (2024). https://doi.org/10.1038/s41467-024-45922-8
+ Brake, N., Duc, F., Rokos, A. *et al.* A neurophysiological basis for aperiodic EEG and the background spectral trend. *Nat Commun* **15**, 1514 (2024). https://doi.org/10.1038/s41467-024-45922-8
 
 ## Executing code in this repository
 
