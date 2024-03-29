@@ -20,8 +20,8 @@ function y = eq5(tau1,offset,mag,f)
 	y0 = tau1 ./ (1+tau1^2*f.^2);
 	y = mag + log10(exp(offset)+y0);
 end
-function y = eq6(tau1,tau2,offset,mag,f)
-	y0 = (tau1-tau2)^2 ./ ((1+tau1^2*f.^2).*(1+tau2^2*f.^2));
+function y = eq6(tau1,taur,offset,mag,f)
+	y0 = (taur-tau1)^2 ./ ((1+tau1^2*f.^2).*(1+taur^2*f.^2));
 	y = mag + log10(exp(offset)+y0);
 end
 function y = fitPeaks(x,f)
